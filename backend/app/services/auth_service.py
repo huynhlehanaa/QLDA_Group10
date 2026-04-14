@@ -12,6 +12,7 @@ Auth service: PB001-PB015
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 from uuid import UUID
+import logging
 
 import redis as redis_client
 from fastapi import HTTPException, Request, status
@@ -36,12 +37,55 @@ from app.services.email_service import (
 )
 
 r = redis_client.from_url(settings.REDIS_URL, decode_responses=True)
+logger = logging.getLogger(__name__)
 
 # Redis key prefixes
 _REFRESH_PREFIX = "refresh:"     # refresh:<token> = user_id
 _BLACKLIST_PREFIX = "bl:"        # bl:<token> = "1"
 _OTP_PREFIX = "otp:"             # otp:<email> = otp_code
 _OTP_LOCK_PREFIX = "otplk:"      # resend cooldown 60s
+
+
+def _redis_unavailable_error() -> HTTPException:
+    return HTTPException(
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        detail={
+            "code": "CACHE_UNAVAILABLE",
+            "message": "Dịch vụ phiên tạm thời không khả dụng. Vui lòng thử lại.",
+        },
+    )
+
+
+def _redis_setex(key: str, ttl, value: str):
+    try:
+        r.setex(key, ttl, value)
+    except redis_client.RedisError as exc:
+        logger.exception("Redis setex failed for key=%s", key)
+        raise _redis_unavailable_error() from exc
+
+
+def _redis_get(key: str) -> Optional[str]:
+    try:
+        return r.get(key)
+    except redis_client.RedisError as exc:
+        logger.exception("Redis get failed for key=%s", key)
+        raise _redis_unavailable_error() from exc
+
+
+def _redis_delete(key: str):
+    try:
+        r.delete(key)
+    except redis_client.RedisError as exc:
+        logger.exception("Redis delete failed for key=%s", key)
+        raise _redis_unavailable_error() from exc
+
+
+def _redis_keys(pattern: str) -> list[str]:
+    try:
+        return r.keys(pattern)
+    except redis_client.RedisError as exc:
+        logger.exception("Redis keys failed for pattern=%s", pattern)
+        raise _redis_unavailable_error() from exc
 
 
 def _log(db: Session, user_id: Optional[UUID], email: str, success: bool, request: Request):
@@ -133,7 +177,7 @@ def login(email: str, password: str, db: Session, request: Request) -> dict:
     refresh_token = create_refresh_token(payload)
 
     # Lưu refresh token vào Redis (PB006: có thể invalidate all)
-    r.setex(
+    _redis_setex(
         f"{_REFRESH_PREFIX}{refresh_token}",
         timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
         str(user.id),
@@ -158,7 +202,7 @@ def refresh_token(token: str) -> dict:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token không hợp lệ")
 
     # Kiểm tra token còn trong Redis không
-    stored = r.get(f"{_REFRESH_PREFIX}{token}")
+    stored = _redis_get(f"{_REFRESH_PREFIX}{token}")
     if not stored:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token đã hết hạn hoặc bị thu hồi")
 
@@ -166,8 +210,8 @@ def refresh_token(token: str) -> dict:
     new_refresh = create_refresh_token({"sub": payload["sub"], "role": payload["role"]})
 
     # Xoay refresh token (rotation)
-    r.delete(f"{_REFRESH_PREFIX}{token}")
-    r.setex(
+    _redis_delete(f"{_REFRESH_PREFIX}{token}")
+    _redis_setex(
         f"{_REFRESH_PREFIX}{new_refresh}",
         timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
         stored,
@@ -178,15 +222,15 @@ def refresh_token(token: str) -> dict:
 
 def logout(refresh_token: str):
     """PB005: đăng xuất thiết bị hiện tại"""
-    r.delete(f"{_REFRESH_PREFIX}{refresh_token}")
+    _redis_delete(f"{_REFRESH_PREFIX}{refresh_token}")
 
 
 def logout_all(user_id: str):
     """PB006: đăng xuất tất cả thiết bị - xóa mọi refresh token của user"""
-    keys = r.keys(f"{_REFRESH_PREFIX}*")
+    keys = _redis_keys(f"{_REFRESH_PREFIX}*")
     for key in keys:
-        if r.get(key) == user_id:
-            r.delete(key)
+        if _redis_get(key) == user_id:
+            _redis_delete(key)
 
 
 def forgot_password(email: str, db: Session):
@@ -198,7 +242,7 @@ def forgot_password(email: str, db: Session):
 
     token = create_reset_token(str(user.id))
     # Lưu token vào Redis để đảm bảo dùng 1 lần
-    r.setex(f"reset:{token}", timedelta(minutes=settings.RESET_TOKEN_EXPIRE_MINUTES), str(user.id))
+    _redis_setex(f"reset:{token}", timedelta(minutes=settings.RESET_TOKEN_EXPIRE_MINUTES), str(user.id))
 
     reset_link = f"{settings.APP_URL}/reset-password?token={token}"
     send_reset_password_email(user.email, reset_link)
@@ -211,7 +255,7 @@ def reset_password(token: str, new_password: str, db: Session):
         raise HTTPException(status_code=400, detail="Link reset không hợp lệ hoặc đã hết hạn")
 
     # Kiểm tra token còn trong Redis (dùng 1 lần)
-    stored = r.get(f"reset:{token}")
+    stored = _redis_get(f"reset:{token}")
     if not stored:
         raise HTTPException(status_code=400, detail="Link reset đã được sử dụng hoặc hết hạn")
 
@@ -230,7 +274,7 @@ def reset_password(token: str, new_password: str, db: Session):
 
     user.password_hash = hash_password(new_password)
     user.must_change_pw = False
-    r.delete(f"reset:{token}")
+    _redis_delete(f"reset:{token}")
     db.commit()
 
     # PB009-style: đăng xuất tất cả thiết bị sau khi đổi mật khẩu
@@ -264,23 +308,23 @@ def send_otp(email: str, db: Session):
         raise HTTPException(status_code=404, detail="Email không tồn tại")
 
     # Kiểm tra cooldown 60 giây
-    if r.get(f"{_OTP_LOCK_PREFIX}{email}"):
+    if _redis_get(f"{_OTP_LOCK_PREFIX}{email}"):
         raise HTTPException(status_code=429, detail="Vui lòng chờ 60 giây trước khi gửi lại OTP")
 
     otp = generate_otp()
-    r.setex(f"{_OTP_PREFIX}{email}", timedelta(minutes=settings.OTP_EXPIRE_MINUTES), otp)
-    r.setex(f"{_OTP_LOCK_PREFIX}{email}", 60, "1")  # cooldown 60s
+    _redis_setex(f"{_OTP_PREFIX}{email}", timedelta(minutes=settings.OTP_EXPIRE_MINUTES), otp)
+    _redis_setex(f"{_OTP_LOCK_PREFIX}{email}", 60, "1")  # cooldown 60s
 
     send_otp_email(user.email, user.full_name, otp)
 
 
 def verify_otp(email: str, otp: str, db: Session) -> dict:
     """PB011: xác thực OTP và cấp token"""
-    stored_otp = r.get(f"{_OTP_PREFIX}{email}")
+    stored_otp = _redis_get(f"{_OTP_PREFIX}{email}")
     if not stored_otp or stored_otp != otp:
         raise HTTPException(status_code=400, detail="OTP không hợp lệ hoặc đã hết hạn")
 
-    r.delete(f"{_OTP_PREFIX}{email}")
+    _redis_delete(f"{_OTP_PREFIX}{email}")
 
     user = db.query(User).filter(User.email == email).first()
     payload = {"sub": str(user.id), "role": user.role}

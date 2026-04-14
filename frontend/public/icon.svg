@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="KPI icon">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#0b4f6c" />
+      <stop offset="1" stop-color="#125d81" />
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="52" fill="url(#g)" />
+  <path d="M56 175h24l18-52 22 32 26-72 14 38h40" fill="none" stroke="#fff" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

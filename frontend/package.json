@@ -1,0 +1,33 @@
+{
+	"name": "kpi-frontend",
+	"version": "0.1.0",
+	"private": true,
+	"scripts": {
+		"dev": "next dev",
+		"build": "next build",
+		"start": "next start",
+		"lint": "next lint",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run",
+		"test:watch": "vitest"
+	},
+	"dependencies": {
+		"axios": "^1.8.2",
+		"next": "^14.2.28",
+		"react": "^18.3.1",
+		"react-dom": "^18.3.1",
+		"zustand": "^5.0.6",
+		"zod": "^3.24.2"
+	},
+	"devDependencies": {
+		"@testing-library/jest-dom": "^6.6.3",
+		"@testing-library/react": "^16.3.0",
+		"@testing-library/user-event": "^14.6.1",
+		"@types/node": "^22.13.10",
+		"@types/react": "^18.3.20",
+		"@types/react-dom": "^18.3.6",
+		"jsdom": "^26.0.0",
+		"typescript": "^5.8.2",
+		"vitest": "^3.0.9"
+	}
+}

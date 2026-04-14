@@ -10,7 +10,7 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(__file__))
 
-from app.db import SessionLocal
+from app.db import Base, SessionLocal, engine
 from app.models.organization import Organization, Department
 from app.models.user import User
 from app.core.security import hash_password
@@ -19,6 +19,9 @@ import uuid
 db = SessionLocal()
 
 try:
+    # Tạo bảng nếu DB còn trống (môi trường mới).
+    Base.metadata.create_all(bind=engine)
+
     # Kiểm tra đã seed chưa
     if db.query(User).filter(User.role == "ceo").first():
         print("Đã có dữ liệu. Bỏ qua seed.")
