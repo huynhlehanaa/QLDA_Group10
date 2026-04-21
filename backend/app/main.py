@@ -2,14 +2,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import auth, users, organizations, logs
+from app.api import tasks   # Sprint 2
 
 app = FastAPI(
     title="KPI Nội Bộ API",
     description="Hệ thống quản lý KPI nội bộ doanh nghiệp",
-    version="1.0.0",
+    version="2.0.0",
 )
 
-# CORS cho Next.js frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
@@ -18,16 +18,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Đăng ký tất cả routers
+# Sprint 1
 app.include_router(auth.router,          prefix="/api/v1")
 app.include_router(users.router,         prefix="/api/v1")
 app.include_router(organizations.router, prefix="/api/v1")
 app.include_router(logs.router,          prefix="/api/v1")
 
+# Sprint 2
+app.include_router(tasks.router,         prefix="/api/v1")
+
 
 @app.get("/")
 def root():
-    return {"status": "ok", "message": "KPI Nội Bộ API v1.0"}
+    return {"status": "ok", "message": "KPI API v2.0 đang chạy"}
 
 
 @app.get("/health")
