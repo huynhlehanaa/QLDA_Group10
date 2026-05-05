@@ -207,4 +207,64 @@ CREATE INDEX idx_notif_user_read  ON "NOTIFICATIONS"("user_id","is_read");
 CREATE INDEX idx_login_user       ON "LOGIN_LOGS"("user_id");
 CREATE INDEX idx_login_created    ON "LOGIN_LOGS"("created_at");
 
-SELECT 'KPI_complete completed!' AS result;
+-- ===================
+-- Sprint 2 Migration
+-- ===================
+
+-- Bảng lịch sử thay đổi task
+CREATE TABLE IF NOT EXISTS "TASK_HISTORY" (
+  "id"          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  "task_id"     uuid NOT NULL,
+  "changed_by"  uuid NOT NULL,
+  "field"       varchar(50),
+  "old_value"   text,
+  "new_value"   text,
+  "note"        text,
+  "created_at"  timestamptz DEFAULT now()
+);
+
+ALTER TABLE "TASK_HISTORY"
+  ADD FOREIGN KEY ("task_id") REFERENCES "TASKS" ("id") ON DELETE CASCADE,
+  ADD FOREIGN KEY ("changed_by") REFERENCES "USERS" ("id");
+
+-- Bảng yêu cầu gia hạn deadline
+CREATE TABLE IF NOT EXISTS "DEADLINE_EXTENSION_REQUESTS" (
+  "id"                uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  "task_id"           uuid NOT NULL,
+  "requested_by"      uuid NOT NULL,
+  "proposed_deadline" timestamptz NOT NULL,
+  "reason"            text NOT NULL,
+  "status"            varchar(20) DEFAULT 'pending',
+  "reviewed_by"       uuid,
+  "review_note"       text,
+  "created_at"        timestamptz DEFAULT now(),
+  "reviewed_at"       timestamptz
+);
+
+ALTER TABLE "DEADLINE_EXTENSION_REQUESTS"
+  ADD FOREIGN KEY ("task_id") REFERENCES "TASKS" ("id") ON DELETE CASCADE,
+  ADD FOREIGN KEY ("requested_by") REFERENCES "USERS" ("id"),
+  ADD FOREIGN KEY ("reviewed_by") REFERENCES "USERS" ("id");
+
+-- Thêm cột còn thiếu vào TASKS
+ALTER TABLE "TASKS"
+  ADD COLUMN IF NOT EXISTS "blocked_by_id" uuid REFERENCES "TASKS"("id"),
+  ADD COLUMN IF NOT EXISTS "cancel_reason" text,
+  ADD COLUMN IF NOT EXISTS "cancelled_at" timestamptz,
+  ADD COLUMN IF NOT EXISTS "last_updated_at" timestamptz DEFAULT now();
+
+-- Thêm cột uploaded_by vào TASK_ATTACHMENTS
+ALTER TABLE "TASK_ATTACHMENTS"
+  ADD COLUMN IF NOT EXISTS "uploaded_by" uuid REFERENCES "USERS"("id");
+
+-- Thêm cột parent_id vào TASK_COMMENTS (reply)
+ALTER TABLE "TASK_COMMENTS"
+  ADD COLUMN IF NOT EXISTS "parent_id" uuid REFERENCES "TASK_COMMENTS"("id");
+
+-- Indexes mới
+CREATE INDEX IF NOT EXISTS idx_tasks_last_updated ON "TASKS"("last_updated_at");
+CREATE INDEX IF NOT EXISTS idx_tasks_epic         ON "TASKS"("epic_id");
+CREATE INDEX IF NOT EXISTS idx_task_history_task  ON "TASK_HISTORY"("task_id");
+CREATE INDEX IF NOT EXISTS idx_ext_req_task       ON "DEADLINE_EXTENSION_REQUESTS"("task_id");
+
+SELECT 'KPI_complete created successfully!' AS result;
