@@ -207,4 +207,4 @@ CREATE INDEX idx_notif_user_read  ON "NOTIFICATIONS"("user_id","is_read");
 CREATE INDEX idx_login_user       ON "LOGIN_LOGS"("user_id");
 CREATE INDEX idx_login_created    ON "LOGIN_LOGS"("created_at");
 
-SELECT 'Schema KPI_complete created successfully!' AS result;
+SELECT 'KPI_complete completed!' AS result;

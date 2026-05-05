@@ -19,6 +19,7 @@ app.add_middleware(
 )
 
 # Đăng ký tất cả routers
+# Sprint 1
 app.include_router(auth.router,          prefix="/api/v1")
 app.include_router(users.router,         prefix="/api/v1")
 app.include_router(organizations.router, prefix="/api/v1")
@@ -27,7 +28,7 @@ app.include_router(logs.router,          prefix="/api/v1")
 
 @app.get("/")
 def root():
-    return {"status": "ok", "message": "KPI Nội Bộ API v1.0"}
+    return {"status": "ok", "message": "KPI API v1.0 đang chạy"}
 
 
 @app.get("/health")
