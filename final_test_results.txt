@@ -1,0 +1,372 @@
+============================= test session starts =============================
+collecting ... collected 256 items
+
+tests/test_auth.py::TestLogin::test_pb001_login_success PASSED           [  0%]
+tests/test_auth.py::TestLogin::test_pb001_login_invalid_email_format PASSED [  0%]
+tests/test_auth.py::TestLogin::test_pb001_login_missing_fields PASSED    [  1%]
+tests/test_auth.py::TestLoginErrors::test_pb002_email_not_found PASSED   [  1%]
+tests/test_auth.py::TestLoginErrors::test_pb002_wrong_password PASSED    [  1%]
+tests/test_auth.py::TestLoginErrors::test_pb002_account_disabled PASSED  [  2%]
+tests/test_auth.py::TestAccountLockout::test_pb003_lock_after_5_failures PASSED [  2%]
+tests/test_auth.py::TestAccountLockout::test_pb003_locked_account_cannot_login PASSED [  3%]
+tests/test_auth.py::TestAccountLockout::test_pb003_failed_count_reset_on_success PASSED [  3%]
+tests/test_auth.py::TestAccountLockout::test_pb003_send_lock_email PASSED [  3%]
+tests/test_auth.py::TestLogout::test_pb005_logout_current_device PASSED  [  4%]
+tests/test_auth.py::TestLogout::test_pb005_refresh_fails_after_logout PASSED [  4%]
+tests/test_auth.py::TestLogoutAll::test_pb006_logout_all_devices PASSED  [  5%]
+tests/test_auth.py::TestPasswordReset::test_pb007_forgot_password_sends_email PASSED [  5%]
+tests/test_auth.py::TestPasswordReset::test_pb007_forgot_password_unknown_email PASSED [  5%]
+tests/test_auth.py::TestPasswordReset::test_pb008_reset_password_success PASSED [  6%]
+tests/test_auth.py::TestPasswordReset::test_pb008_reset_token_single_use PASSED [  6%]
+tests/test_auth.py::TestPasswordReset::test_pb008_password_must_not_match_old PASSED [  7%]
+tests/test_auth.py::TestChangePassword::test_pb009_change_password_success PASSED [  7%]
+tests/test_auth.py::TestChangePassword::test_pb009_wrong_old_password PASSED [  7%]
+tests/test_auth.py::TestChangePassword::test_pb009_logout_all_after_change PASSED [  8%]
+tests/test_auth.py::TestOTP::test_pb011_send_otp FAILED                  [  8%]
+tests/test_auth.py::TestOTP::test_pb011_otp_resend_cooldown PASSED       [  8%]
+tests/test_auth.py::TestOTP::test_pb011_verify_otp_success PASSED        [  9%]
+tests/test_auth.py::TestOTP::test_pb011_verify_wrong_otp PASSED          [  9%]
+tests/test_auth.py::TestJWT::test_pb012_access_token_contains_role PASSED [ 10%]
+tests/test_auth.py::TestJWT::test_pb012_refresh_token_type PASSED        [ 10%]
+tests/test_auth.py::TestJWT::test_pb012_refresh_returns_new_tokens PASSED [ 10%]
+tests/test_auth.py::TestJWT::test_pb012_invalid_token_rejected PASSED    [ 11%]
+tests/test_auth.py::TestLoginLogs::test_pb013_log_successful_login PASSED [ 11%]
+tests/test_auth.py::TestLoginLogs::test_pb014_log_failed_login PASSED    [ 12%]
+tests/test_auth.py::TestLoginLogs::test_pb014_log_nonexistent_email PASSED [ 12%]
+tests/test_auth.py::TestEncryption::test_pb015_bcrypt_password PASSED    [ 12%]
+tests/test_auth.py::TestEncryption::test_pb015_bcrypt_wrong_password PASSED [ 13%]
+tests/test_auth.py::TestEncryption::test_pb015_aes256_encrypt_decrypt PASSED [ 13%]
+tests/test_auth.py::TestEncryption::test_pb015_aes256_different_ciphertext_each_time PASSED [ 14%]
+tests/test_auth.py::TestPermissions::test_pb016_ceo_can_access_logs PASSED [ 14%]
+tests/test_auth.py::TestPermissions::test_pb017_manager_cannot_access_logs PASSED [ 14%]
+tests/test_auth.py::TestPermissions::test_pb018_staff_cannot_access_logs PASSED [ 15%]
+tests/test_auth.py::TestPermissions::test_pb018_staff_can_access_own_profile PASSED [ 15%]
+tests/test_auth.py::TestPermissions::test_unauthenticated_rejected PASSED [ 16%]
+tests/test_auth.py::TestRoleRedirect::test_pb019_login_returns_role_ceo PASSED [ 16%]
+tests/test_auth.py::TestRoleRedirect::test_pb019_login_returns_role_manager PASSED [ 16%]
+tests/test_auth.py::TestRoleRedirect::test_pb019_login_returns_role_staff PASSED [ 17%]
+tests/test_auth.py::TestPasswordValidation::test_password_too_short PASSED [ 17%]
+tests/test_auth.py::TestPasswordValidation::test_password_no_uppercase PASSED [ 17%]
+tests/test_auth.py::TestPasswordValidation::test_password_no_digit PASSED [ 18%]
+tests/test_auth.py::TestPasswordValidation::test_password_no_special_char PASSED [ 18%]
+tests/test_auth.py::TestPasswordValidation::test_password_valid PASSED   [ 19%]
+tests/test_auth.py::TestPasswordValidation::test_reset_password_weak_rejected PASSED [ 19%]
+tests/test_auth.py::TestMustChangePassword::test_pb010_must_change_pw_flag ERROR [ 19%]
+tests/test_auth.py::TestMustChangePassword::test_pb010_flag_cleared_after_change FAILED [ 20%]
+tests/test_auth.py::TestProfileAfterLogin::test_pb020_login_returns_full_name_and_avatar PASSED [ 20%]
+tests/test_organizations.py::TestCreateDepartment::test_pb052_create_department PASSED [ 21%]
+tests/test_organizations.py::TestCreateDepartment::test_pb052_only_ceo_can_create_dept PASSED [ 21%]
+tests/test_organizations.py::TestCreateDepartment::test_pb052_create_dept_with_manager ERROR [ 21%]
+tests/test_organizations.py::TestCreateDepartment::test_pb052_invalid_manager_rejected ERROR [ 22%]
+tests/test_organizations.py::TestUpdateDepartment::test_pb053_update_dept_name PASSED [ 22%]
+tests/test_organizations.py::TestUpdateDepartment::test_pb053_update_dept_description ERROR [ 23%]
+tests/test_organizations.py::TestUpdateDepartment::test_pb053_nonexistent_dept ERROR [ 23%]
+tests/test_organizations.py::TestAssignManager::test_pb054_assign_manager_to_dept ERROR [ 23%]
+tests/test_organizations.py::TestAssignManager::test_pb054_non_manager_user_rejected ERROR [ 24%]
+tests/test_organizations.py::TestAssignManager::test_pb055_replace_manager PASSED [ 24%]
+tests/test_organizations.py::TestDeactivateDepartment::test_pb056_deactivate_empty_dept ERROR [ 25%]
+tests/test_organizations.py::TestDeactivateDepartment::test_pb056_cannot_deactivate_dept_with_active_staff ERROR [ 25%]
+tests/test_organizations.py::TestDeptWithoutManager::test_pb057_detect_dept_without_manager PASSED [ 25%]
+tests/test_organizations.py::TestDeptWithoutManager::test_pb057_dept_with_manager_not_in_list PASSED [ 26%]
+tests/test_organizations.py::TestOrgChart::test_pb058_org_chart_structure ERROR [ 26%]
+tests/test_organizations.py::TestOrgChart::test_pb058_only_ceo_sees_org_chart PASSED [ 26%]
+tests/test_organizations.py::TestOrgChart::test_pb060_dept_list_with_member_count PASSED [ 27%]
+tests/test_organizations.py::TestDeptStats::test_pb050_dept_stats ERROR  [ 27%]
+tests/test_organizations.py::TestDeptStats::test_pb050_only_ceo_sees_stats PASSED [ 28%]
+tests/test_organizations.py::TestDepartmentAccess::test_pb060_staff_can_list_depts PASSED [ 28%]
+tests/test_organizations.py::TestDepartmentAccess::test_pb060_manager_can_list_depts PASSED [ 28%]
+tests/test_security_unit.py::TestHashPassword::test_hash_is_not_plaintext PASSED [ 29%]
+tests/test_security_unit.py::TestHashPassword::test_verify_correct PASSED [ 29%]
+tests/test_security_unit.py::TestHashPassword::test_verify_wrong PASSED  [ 30%]
+tests/test_security_unit.py::TestHashPassword::test_same_password_different_hash PASSED [ 30%]
+tests/test_security_unit.py::TestPasswordStrength::test_strength_cases[Valid@123-True] PASSED [ 30%]
+tests/test_security_unit.py::TestPasswordStrength::test_strength_cases[A1!aaaaa-True] PASSED [ 31%]
+tests/test_security_unit.py::TestPasswordStrength::test_strength_cases[short@1-False] PASSED [ 31%]
+tests/test_security_unit.py::TestPasswordStrength::test_strength_cases[nouppercase@1-False] PASSED [ 32%]
+tests/test_security_unit.py::TestPasswordStrength::test_strength_cases[NoDigit@abc-False] PASSED [ 32%]
+tests/test_security_unit.py::TestPasswordStrength::test_strength_cases[NoSpecial1A-False] PASSED [ 32%]
+tests/test_security_unit.py::TestPasswordStrength::test_strength_cases[-False] PASSED [ 33%]
+tests/test_security_unit.py::TestGenerateTempPassword::test_temp_password_meets_requirements PASSED [ 33%]
+tests/test_security_unit.py::TestGenerateTempPassword::test_temp_password_length PASSED [ 33%]
+tests/test_security_unit.py::TestJWTTokens::test_access_token_decode PASSED [ 34%]
+tests/test_security_unit.py::TestJWTTokens::test_refresh_token_type PASSED [ 34%]
+tests/test_security_unit.py::TestJWTTokens::test_tampered_token_returns_none PASSED [ 35%]
+tests/test_security_unit.py::TestJWTTokens::test_random_string_returns_none PASSED [ 35%]
+tests/test_security_unit.py::TestJWTTokens::test_empty_string_returns_none PASSED [ 35%]
+tests/test_security_unit.py::TestJWTTokens::test_access_cannot_be_used_as_refresh PASSED [ 36%]
+tests/test_security_unit.py::TestOTP::test_otp_is_6_digits PASSED        [ 36%]
+tests/test_security_unit.py::TestOTP::test_otps_are_random PASSED        [ 37%]
+tests/test_security_unit.py::TestAES256::test_encrypt_decrypt_roundtrip PASSED [ 37%]
+tests/test_security_unit.py::TestAES256::test_encrypted_is_hex_string PASSED [ 37%]
+tests/test_security_unit.py::TestAES256::test_different_ciphertext_same_plaintext PASSED [ 38%]
+tests/test_security_unit.py::TestAES256::test_encrypt_empty_string PASSED [ 38%]
+tests/test_tasks_advanced.py::TestOverdueDetection::test_pb098_overdue_task_flagged PASSED [ 39%]
+tests/test_tasks_advanced.py::TestOverdueDetection::test_pb098_done_task_not_overdue ERROR [ 39%]
+tests/test_tasks_advanced.py::TestOverdueDetection::test_pb098_future_deadline_not_overdue ERROR [ 39%]
+tests/test_tasks_advanced.py::TestDeadlineExtension::test_pb099_staff_requests_extension ERROR [ 40%]
+tests/test_tasks_advanced.py::TestDeadlineExtension::test_pb099_unassigned_cannot_request_extension PASSED [ 40%]
+tests/test_tasks_advanced.py::TestDeadlineExtension::test_pb100_manager_approves_extension PASSED [ 41%]
+tests/test_tasks_advanced.py::TestDeadlineExtension::test_pb100_manager_rejects_extension ERROR [ 41%]
+tests/test_tasks_advanced.py::TestDeadlineExtension::test_pb100_staff_cannot_review_extension PASSED [ 41%]
+tests/test_tasks_advanced.py::TestWorkload::test_pb101_workload_shows_all_staff PASSED [ 42%]
+tests/test_tasks_advanced.py::TestWorkload::test_pb101_workload_shows_task_counts ERROR [ 42%]
+tests/test_tasks_advanced.py::TestWorkload::test_pb101_workload_sorted_by_total ERROR [ 42%]
+tests/test_tasks_advanced.py::TestWorkload::test_pb101_staff_cannot_view_workload PASSED [ 43%]
+tests/test_tasks_advanced.py::TestWorkload::test_pb102_overdue_counted_in_workload ERROR [ 43%]
+tests/test_tasks_advanced.py::TestRecurringTasks::test_pb073_recurring_task_created_as_daily PASSED [ 44%]
+tests/test_tasks_advanced.py::TestRecurringTasks::test_pb074_recurring_weekly_task ERROR [ 44%]
+tests/test_tasks_advanced.py::TestRecurringTasks::test_pb075_recurring_monthly_task ERROR [ 44%]
+tests/test_tasks_advanced.py::TestRecurringTasks::test_pb076_stop_recurring ERROR [ 45%]
+tests/test_tasks_advanced.py::TestRecurringTasks::test_pb076_staff_cannot_stop_recurring FAILED [ 45%]
+tests/test_tasks_advanced.py::TestCeleryWorkers::test_create_recurring_tasks_daily PASSED [ 46%]
+tests/test_tasks_advanced.py::TestCeleryWorkers::test_pb104_stale_task_detection FAILED [ 46%]
+tests/test_tasks_advanced.py::TestTaskStats::test_pb117_stats_for_manager ERROR [ 46%]
+tests/test_tasks_advanced.py::TestTaskStats::test_pb117_stats_for_staff ERROR [ 47%]
+tests/test_tasks_advanced.py::TestTaskStats::test_pb118_stats_date_filter ERROR [ 47%]
+tests/test_tasks_advanced.py::TestTaskStats::test_pb117_overdue_counted_correctly ERROR [ 48%]
+tests/test_tasks_advanced.py::TestExportExcel::test_pb119_export_returns_excel ERROR [ 48%]
+tests/test_tasks_advanced.py::TestExportExcel::test_pb119_export_with_filter ERROR [ 48%]
+tests/test_tasks_advanced.py::TestExportExcel::test_pb119_export_content_valid PASSED [ 49%]
+tests/test_tasks_advanced.py::TestExportExcel::test_pb119_staff_cannot_export ERROR [ 49%]
+tests/test_tasks_advanced.py::TestIsOverdueComputed::test_overdue_appears_in_list PASSED [ 50%]
+tests/test_tasks_advanced.py::TestIsOverdueComputed::test_completed_not_overdue_in_list ERROR [ 50%]
+tests/test_tasks_crud.py::TestCreateTask::test_pb062_manager_creates_task PASSED [ 50%]
+tests/test_tasks_crud.py::TestCreateTask::test_pb062_staff_cannot_create_task PASSED [ 51%]
+tests/test_tasks_crud.py::TestCreateTask::test_pb063_empty_title_rejected PASSED [ 51%]
+tests/test_tasks_crud.py::TestCreateTask::test_pb063_missing_title_rejected ERROR [ 51%]
+tests/test_tasks_crud.py::TestCreateTask::test_pb064_assign_to_own_dept_staff ERROR [ 52%]
+tests/test_tasks_crud.py::TestCreateTask::test_pb064_assign_to_other_dept_rejected PASSED [ 52%]
+tests/test_tasks_crud.py::TestCreateTask::test_pb065_assign_multiple_staff PASSED [ 53%]
+tests/test_tasks_crud.py::TestCreateTask::test_pb066_future_deadline_accepted PASSED [ 53%]
+tests/test_tasks_crud.py::TestCreateTask::test_pb066_past_deadline_rejected PASSED [ 53%]
+tests/test_tasks_crud.py::TestCreateTask::test_pb067_priority_values FAILED [ 54%]
+tests/test_tasks_crud.py::TestCreateTask::test_pb067_invalid_priority_rejected ERROR [ 54%]
+tests/test_tasks_crud.py::TestCreateTask::test_pb068_default_status_todo PASSED [ 55%]
+tests/test_tasks_crud.py::TestCreateTask::test_pb069_blocked_by_existing_task ERROR [ 55%]
+tests/test_tasks_crud.py::TestCreateTask::test_pb070_blocked_by_nonexistent_rejected PASSED [ 55%]
+tests/test_tasks_crud.py::TestCreateTask::test_pb103_overload_warning ERROR [ 56%]
+tests/test_tasks_crud.py::TestListAndKanban::test_pb079_manager_list_dept_tasks ERROR [ 56%]
+tests/test_tasks_crud.py::TestListAndKanban::test_pb080_staff_sees_only_assigned_tasks ERROR [ 57%]
+tests/test_tasks_crud.py::TestListAndKanban::test_pb081_kanban_has_3_columns ERROR [ 57%]
+tests/test_tasks_crud.py::TestListAndKanban::test_pb082_kanban_columns_have_count ERROR [ 57%]
+tests/test_tasks_crud.py::TestListAndKanban::test_pb083_get_task_detail ERROR [ 58%]
+tests/test_tasks_crud.py::TestListAndKanban::test_pb083_staff_cannot_view_unassigned_task ERROR [ 58%]
+tests/test_tasks_crud.py::TestListAndKanban::test_pb083_staff_can_view_assigned_task ERROR [ 58%]
+tests/test_tasks_crud.py::TestTaskFiltersAndSort::test_pb105_search_by_title FAILED [ 59%]
+tests/test_tasks_crud.py::TestTaskFiltersAndSort::test_pb108_filter_by_status PASSED [ 59%]
+tests/test_tasks_crud.py::TestTaskFiltersAndSort::test_pb110_filter_by_priority FAILED [ 60%]
+tests/test_tasks_crud.py::TestTaskFiltersAndSort::test_pb109_filter_by_assignee ERROR [ 60%]
+tests/test_tasks_crud.py::TestTaskFiltersAndSort::test_pb115_overdue_filter ERROR [ 60%]
+tests/test_tasks_crud.py::TestTaskFiltersAndSort::test_pb114_sort_by_deadline ERROR [ 61%]
+tests/test_tasks_crud.py::TestEpic::test_pb077_create_epic PASSED        [ 61%]
+tests/test_tasks_crud.py::TestEpic::test_pb077_staff_cannot_create_epic PASSED [ 62%]
+tests/test_tasks_crud.py::TestEpic::test_pb078_epic_shows_progress ERROR [ 62%]
+tests/test_tasks_status.py::TestStatusTransitions::test_pb084_todo_to_in_progress ERROR [ 62%]
+tests/test_tasks_status.py::TestStatusTransitions::test_pb084_in_progress_to_done ERROR [ 63%]
+tests/test_tasks_status.py::TestStatusTransitions::test_pb084_invalid_status_rejected ERROR [ 63%]
+tests/test_tasks_status.py::TestStatusTransitions::test_pb084_unassigned_staff_cannot_update_status FAILED [ 64%]
+tests/test_tasks_status.py::TestStatusTransitions::test_pb085_progress_update ERROR [ 64%]
+tests/test_tasks_status.py::TestStatusTransitions::test_pb085_progress_100_auto_done ERROR [ 64%]
+tests/test_tasks_status.py::TestStatusTransitions::test_pb085_invalid_progress_rejected ERROR [ 65%]
+tests/test_tasks_status.py::TestStatusTransitions::test_pb086_done_records_completed_at ERROR [ 65%]
+tests/test_tasks_status.py::TestComments::test_pb087_first_comment_triggers_in_progress PASSED [ 66%]
+tests/test_tasks_status.py::TestComments::test_pb087_second_comment_no_transition ERROR [ 66%]
+tests/test_tasks_status.py::TestComments::test_pb088_add_comment_success ERROR [ 66%]
+tests/test_tasks_status.py::TestComments::test_pb088_unassigned_cannot_comment ERROR [ 67%]
+tests/test_tasks_status.py::TestComments::test_pb090_manager_views_comments ERROR [ 67%]
+tests/test_tasks_status.py::TestComments::test_pb091_reply_to_comment ERROR [ 67%]
+tests/test_tasks_status.py::TestAttachments::test_pb069_add_attachment ERROR [ 68%]
+tests/test_tasks_status.py::TestAttachments::test_pb069_max_5_attachments ERROR [ 68%]
+tests/test_tasks_status.py::TestAttachments::test_pb069_max_10mb ERROR   [ 69%]
+tests/test_tasks_status.py::TestChecklist::test_pb071_add_checklist_item ERROR [ 69%]
+tests/test_tasks_status.py::TestChecklist::test_pb071_check_item_done ERROR [ 69%]
+tests/test_tasks_status.py::TestChecklist::test_pb072_checklist_auto_update_progress ERROR [ 70%]
+tests/test_tasks_status.py::TestUpdateTask::test_pb094_manager_updates_task ERROR [ 70%]
+tests/test_tasks_status.py::TestUpdateTask::test_pb094_staff_cannot_update_task ERROR [ 71%]
+tests/test_tasks_status.py::TestUpdateTask::test_pb095_deadline_change_logged ERROR [ 71%]
+tests/test_tasks_status.py::TestUpdateTask::test_pb096_reassign_task ERROR [ 71%]
+tests/test_tasks_status.py::TestUpdateTask::test_pb097_cancel_task ERROR [ 72%]
+tests/test_tasks_status.py::TestUpdateTask::test_pb097_staff_cannot_cancel_task ERROR [ 72%]
+tests/test_tasks_status.py::TestHistory::test_pb092_status_change_logged ERROR [ 73%]
+tests/test_tasks_status.py::TestHistory::test_pb092_task_creation_logged ERROR [ 73%]
+tests/test_tasks_status.py::TestHistory::test_pb092_history_visible_in_detail ERROR [ 73%]
+tests/test_tasks_unit.py::TestTaskCreateSchema::test_valid_task PASSED   [ 74%]
+tests/test_tasks_unit.py::TestTaskCreateSchema::test_empty_title_fails PASSED [ 74%]
+tests/test_tasks_unit.py::TestTaskCreateSchema::test_whitespace_title_fails PASSED [ 75%]
+tests/test_tasks_unit.py::TestTaskCreateSchema::test_title_stripped PASSED [ 75%]
+tests/test_tasks_unit.py::TestTaskCreateSchema::test_invalid_priority PASSED [ 75%]
+tests/test_tasks_unit.py::TestTaskCreateSchema::test_valid_priorities PASSED [ 76%]
+tests/test_tasks_unit.py::TestTaskCreateSchema::test_past_deadline_fails PASSED [ 76%]
+tests/test_tasks_unit.py::TestTaskCreateSchema::test_no_deadline_accepted PASSED [ 76%]
+tests/test_tasks_unit.py::TestTaskCreateSchema::test_default_priority_medium PASSED [ 77%]
+tests/test_tasks_unit.py::TestTaskCreateSchema::test_default_not_recurring PASSED [ 77%]
+tests/test_tasks_unit.py::TestTaskCreateSchema::test_empty_assignees_default PASSED [ 78%]
+tests/test_tasks_unit.py::TestStatusUpdateSchema::test_valid_statuses PASSED [ 78%]
+tests/test_tasks_unit.py::TestStatusUpdateSchema::test_invalid_status PASSED [ 78%]
+tests/test_tasks_unit.py::TestStatusUpdateSchema::test_invalid_status_uppercase PASSED [ 79%]
+tests/test_tasks_unit.py::TestProgressUpdateSchema::test_valid_progress PASSED [ 79%]
+tests/test_tasks_unit.py::TestProgressUpdateSchema::test_negative_progress PASSED [ 80%]
+tests/test_tasks_unit.py::TestProgressUpdateSchema::test_over_100_progress PASSED [ 80%]
+tests/test_tasks_unit.py::TestExtensionRequestSchema::test_valid_extension_request PASSED [ 80%]
+tests/test_tasks_unit.py::TestExtensionRequestSchema::test_missing_reason_fails PASSED [ 81%]
+tests/test_tasks_unit.py::TestExtensionRequestSchema::test_missing_deadline_fails PASSED [ 81%]
+tests/test_tasks_unit.py::TestCommentSchema::test_valid_comment PASSED   [ 82%]
+tests/test_tasks_unit.py::TestCommentSchema::test_reply_comment PASSED   [ 82%]
+tests/test_tasks_unit.py::TestOverdueLogic::test_past_deadline_in_progress_is_overdue PASSED [ 82%]
+tests/test_tasks_unit.py::TestOverdueLogic::test_future_deadline_not_overdue PASSED [ 83%]
+tests/test_tasks_unit.py::TestOverdueLogic::test_done_task_past_deadline_not_overdue PASSED [ 83%]
+tests/test_tasks_unit.py::TestOverdueLogic::test_cancelled_task_not_overdue PASSED [ 83%]
+tests/test_tasks_unit.py::TestOverdueLogic::test_no_deadline_not_overdue PASSED [ 84%]
+tests/test_tasks_unit.py::TestKanbanGrouping::test_empty_tasks PASSED    [ 84%]
+tests/test_tasks_unit.py::TestKanbanGrouping::test_single_todo PASSED    [ 85%]
+tests/test_tasks_unit.py::TestKanbanGrouping::test_mixed_tasks PASSED    [ 85%]
+tests/test_tasks_unit.py::TestKanbanGrouping::test_cancelled_excluded_from_kanban PASSED [ 85%]
+tests/test_users.py::TestCreateManager::test_pb022_ceo_creates_manager ERROR [ 86%]
+tests/test_users.py::TestCreateManager::test_pb022_only_ceo_can_create_manager ERROR [ 86%]
+tests/test_users.py::TestCreateManager::test_pb023_duplicate_email_rejected ERROR [ 87%]
+tests/test_users.py::TestCreateManager::test_pb024_welcome_email_sent ERROR [ 87%]
+tests/test_users.py::TestCreateManager::test_pb048_manager_without_dept_rejected ERROR [ 87%]
+tests/test_users.py::TestListManagers::test_pb025_ceo_list_managers ERROR [ 88%]
+tests/test_users.py::TestListManagers::test_pb026_search_manager_by_name ERROR [ 88%]
+tests/test_users.py::TestListManagers::test_pb026_search_no_results ERROR [ 89%]
+tests/test_users.py::TestListManagers::test_pb025_pagination ERROR       [ 89%]
+tests/test_users.py::TestUpdateManager::test_pb027_update_manager_name ERROR [ 89%]
+tests/test_users.py::TestUpdateManager::test_pb028_transfer_manager_to_dept ERROR [ 90%]
+tests/test_users.py::TestManagerStatusManagement::test_pb029_reset_manager_password ERROR [ 90%]
+tests/test_users.py::TestManagerStatusManagement::test_pb030_deactivate_manager ERROR [ 91%]
+tests/test_users.py::TestManagerStatusManagement::test_pb030_deactivated_cannot_login ERROR [ 91%]
+tests/test_users.py::TestManagerStatusManagement::test_pb031_reactivate_manager ERROR [ 91%]
+tests/test_users.py::TestCreateStaff::test_pb032_manager_creates_staff PASSED [ 92%]
+tests/test_users.py::TestCreateStaff::test_pb032_staff_cannot_create_staff PASSED [ 92%]
+tests/test_users.py::TestCreateStaff::test_pb033_duplicate_staff_email ERROR [ 92%]
+tests/test_users.py::TestCreateStaff::test_pb034_staff_welcome_email_sent ERROR [ 93%]
+tests/test_users.py::TestManageStaff::test_pb035_list_staff_in_dept ERROR [ 93%]
+tests/test_users.py::TestManageStaff::test_pb036_search_staff_by_name ERROR [ 94%]
+tests/test_users.py::TestManageStaff::test_pb037_update_staff_info ERROR [ 94%]
+tests/test_users.py::TestManageStaff::test_pb038_manager_resets_staff_password ERROR [ 94%]
+tests/test_users.py::TestManageStaff::test_pb038_manager_cannot_reset_other_dept_staff FAILED [ 95%]
+tests/test_users.py::TestManageStaff::test_pb039_deactivate_staff ERROR  [ 95%]
+tests/test_users.py::TestManageStaff::test_pb040_activate_staff ERROR    [ 96%]
+tests/test_users.py::TestImportStaff::test_pb041_download_template PASSED [ 96%]
+tests/test_users.py::TestImportStaff::test_pb042_import_staff_from_excel PASSED [ 96%]
+tests/test_users.py::TestImportStaff::test_pb042_import_reports_duplicate_email ERROR [ 97%]
+tests/test_users.py::TestImportStaff::test_pb042_import_rejects_non_excel ERROR [ 97%]
+tests/test_users.py::TestProfile::test_pb043_view_own_profile ERROR      [ 98%]
+tests/test_users.py::TestProfile::test_pb044_update_avatar ERROR         [ 98%]
+tests/test_users.py::TestProfile::test_pb045_update_phone_valid ERROR    [ 98%]
+tests/test_users.py::TestProfile::test_pb045_invalid_phone_rejected ERROR [ 99%]
+tests/test_users.py::TestProfile::test_pb045_valid_phone_formats PASSED  [ 99%]
+tests/test_users.py::TestProfile::test_pb047_first_login_tracked PASSED  [100%]
+
+=========================== short test summary info ===========================
+FAILED tests/test_auth.py::TestOTP::test_pb011_send_otp - assert 429 == 200
+FAILED tests/test_auth.py::TestMustChangePassword::test_pb010_flag_cleared_after_change
+FAILED tests/test_tasks_advanced.py::TestRecurringTasks::test_pb076_staff_cannot_stop_recurring
+FAILED tests/test_tasks_advanced.py::TestCeleryWorkers::test_pb104_stale_task_detection
+FAILED tests/test_tasks_crud.py::TestCreateTask::test_pb067_priority_values
+FAILED tests/test_tasks_crud.py::TestTaskFiltersAndSort::test_pb105_search_by_title
+FAILED tests/test_tasks_crud.py::TestTaskFiltersAndSort::test_pb110_filter_by_priority
+FAILED tests/test_tasks_status.py::TestStatusTransitions::test_pb084_unassigned_staff_cannot_update_status
+FAILED tests/test_users.py::TestManageStaff::test_pb038_manager_cannot_reset_other_dept_staff
+ERROR tests/test_auth.py::TestMustChangePassword::test_pb010_must_change_pw_flag
+ERROR tests/test_organizations.py::TestCreateDepartment::test_pb052_create_dept_with_manager
+ERROR tests/test_organizations.py::TestCreateDepartment::test_pb052_invalid_manager_rejected
+ERROR tests/test_organizations.py::TestUpdateDepartment::test_pb053_update_dept_description
+ERROR tests/test_organizations.py::TestUpdateDepartment::test_pb053_nonexistent_dept
+ERROR tests/test_organizations.py::TestAssignManager::test_pb054_assign_manager_to_dept
+ERROR tests/test_organizations.py::TestAssignManager::test_pb054_non_manager_user_rejected
+ERROR tests/test_organizations.py::TestDeactivateDepartment::test_pb056_deactivate_empty_dept
+ERROR tests/test_organizations.py::TestDeactivateDepartment::test_pb056_cannot_deactivate_dept_with_active_staff
+ERROR tests/test_organizations.py::TestOrgChart::test_pb058_org_chart_structure
+ERROR tests/test_organizations.py::TestDeptStats::test_pb050_dept_stats - Ass...
+ERROR tests/test_tasks_advanced.py::TestOverdueDetection::test_pb098_done_task_not_overdue
+ERROR tests/test_tasks_advanced.py::TestOverdueDetection::test_pb098_future_deadline_not_overdue
+ERROR tests/test_tasks_advanced.py::TestDeadlineExtension::test_pb099_staff_requests_extension
+ERROR tests/test_tasks_advanced.py::TestDeadlineExtension::test_pb100_manager_rejects_extension
+ERROR tests/test_tasks_advanced.py::TestWorkload::test_pb101_workload_shows_task_counts
+ERROR tests/test_tasks_advanced.py::TestWorkload::test_pb101_workload_sorted_by_total
+ERROR tests/test_tasks_advanced.py::TestWorkload::test_pb102_overdue_counted_in_workload
+ERROR tests/test_tasks_advanced.py::TestRecurringTasks::test_pb074_recurring_weekly_task
+ERROR tests/test_tasks_advanced.py::TestRecurringTasks::test_pb075_recurring_monthly_task
+ERROR tests/test_tasks_advanced.py::TestRecurringTasks::test_pb076_stop_recurring
+ERROR tests/test_tasks_advanced.py::TestTaskStats::test_pb117_stats_for_manager
+ERROR tests/test_tasks_advanced.py::TestTaskStats::test_pb117_stats_for_staff
+ERROR tests/test_tasks_advanced.py::TestTaskStats::test_pb118_stats_date_filter
+ERROR tests/test_tasks_advanced.py::TestTaskStats::test_pb117_overdue_counted_correctly
+ERROR tests/test_tasks_advanced.py::TestExportExcel::test_pb119_export_returns_excel
+ERROR tests/test_tasks_advanced.py::TestExportExcel::test_pb119_export_with_filter
+ERROR tests/test_tasks_advanced.py::TestExportExcel::test_pb119_staff_cannot_export
+ERROR tests/test_tasks_advanced.py::TestIsOverdueComputed::test_completed_not_overdue_in_list
+ERROR tests/test_tasks_crud.py::TestCreateTask::test_pb063_missing_title_rejected
+ERROR tests/test_tasks_crud.py::TestCreateTask::test_pb064_assign_to_own_dept_staff
+ERROR tests/test_tasks_crud.py::TestCreateTask::test_pb067_invalid_priority_rejected
+ERROR tests/test_tasks_crud.py::TestCreateTask::test_pb069_blocked_by_existing_task
+ERROR tests/test_tasks_crud.py::TestCreateTask::test_pb103_overload_warning
+ERROR tests/test_tasks_crud.py::TestListAndKanban::test_pb079_manager_list_dept_tasks
+ERROR tests/test_tasks_crud.py::TestListAndKanban::test_pb080_staff_sees_only_assigned_tasks
+ERROR tests/test_tasks_crud.py::TestListAndKanban::test_pb081_kanban_has_3_columns
+ERROR tests/test_tasks_crud.py::TestListAndKanban::test_pb082_kanban_columns_have_count
+ERROR tests/test_tasks_crud.py::TestListAndKanban::test_pb083_get_task_detail
+ERROR tests/test_tasks_crud.py::TestListAndKanban::test_pb083_staff_cannot_view_unassigned_task
+ERROR tests/test_tasks_crud.py::TestListAndKanban::test_pb083_staff_can_view_assigned_task
+ERROR tests/test_tasks_crud.py::TestTaskFiltersAndSort::test_pb109_filter_by_assignee
+ERROR tests/test_tasks_crud.py::TestTaskFiltersAndSort::test_pb115_overdue_filter
+ERROR tests/test_tasks_crud.py::TestTaskFiltersAndSort::test_pb114_sort_by_deadline
+ERROR tests/test_tasks_crud.py::TestEpic::test_pb078_epic_shows_progress - sq...
+ERROR tests/test_tasks_status.py::TestStatusTransitions::test_pb084_todo_to_in_progress
+ERROR tests/test_tasks_status.py::TestStatusTransitions::test_pb084_in_progress_to_done
+ERROR tests/test_tasks_status.py::TestStatusTransitions::test_pb084_invalid_status_rejected
+ERROR tests/test_tasks_status.py::TestStatusTransitions::test_pb085_progress_update
+ERROR tests/test_tasks_status.py::TestStatusTransitions::test_pb085_progress_100_auto_done
+ERROR tests/test_tasks_status.py::TestStatusTransitions::test_pb085_invalid_progress_rejected
+ERROR tests/test_tasks_status.py::TestStatusTransitions::test_pb086_done_records_completed_at
+ERROR tests/test_tasks_status.py::TestComments::test_pb087_second_comment_no_transition
+ERROR tests/test_tasks_status.py::TestComments::test_pb088_add_comment_success
+ERROR tests/test_tasks_status.py::TestComments::test_pb088_unassigned_cannot_comment
+ERROR tests/test_tasks_status.py::TestComments::test_pb090_manager_views_comments
+ERROR tests/test_tasks_status.py::TestComments::test_pb091_reply_to_comment
+ERROR tests/test_tasks_status.py::TestAttachments::test_pb069_add_attachment
+ERROR tests/test_tasks_status.py::TestAttachments::test_pb069_max_5_attachments
+ERROR tests/test_tasks_status.py::TestAttachments::test_pb069_max_10mb - sqla...
+ERROR tests/test_tasks_status.py::TestChecklist::test_pb071_add_checklist_item
+ERROR tests/test_tasks_status.py::TestChecklist::test_pb071_check_item_done
+ERROR tests/test_tasks_status.py::TestChecklist::test_pb072_checklist_auto_update_progress
+ERROR tests/test_tasks_status.py::TestUpdateTask::test_pb094_manager_updates_task
+ERROR tests/test_tasks_status.py::TestUpdateTask::test_pb094_staff_cannot_update_task
+ERROR tests/test_tasks_status.py::TestUpdateTask::test_pb095_deadline_change_logged
+ERROR tests/test_tasks_status.py::TestUpdateTask::test_pb096_reassign_task - ...
+ERROR tests/test_tasks_status.py::TestUpdateTask::test_pb097_cancel_task - sq...
+ERROR tests/test_tasks_status.py::TestUpdateTask::test_pb097_staff_cannot_cancel_task
+ERROR tests/test_tasks_status.py::TestHistory::test_pb092_status_change_logged
+ERROR tests/test_tasks_status.py::TestHistory::test_pb092_task_creation_logged
+ERROR tests/test_tasks_status.py::TestHistory::test_pb092_history_visible_in_detail
+ERROR tests/test_users.py::TestCreateManager::test_pb022_ceo_creates_manager
+ERROR tests/test_users.py::TestCreateManager::test_pb022_only_ceo_can_create_manager
+ERROR tests/test_users.py::TestCreateManager::test_pb023_duplicate_email_rejected
+ERROR tests/test_users.py::TestCreateManager::test_pb024_welcome_email_sent
+ERROR tests/test_users.py::TestCreateManager::test_pb048_manager_without_dept_rejected
+ERROR tests/test_users.py::TestListManagers::test_pb025_ceo_list_managers - s...
+ERROR tests/test_users.py::TestListManagers::test_pb026_search_manager_by_name
+ERROR tests/test_users.py::TestListManagers::test_pb026_search_no_results - A...
+ERROR tests/test_users.py::TestListManagers::test_pb025_pagination - Assertio...
+ERROR tests/test_users.py::TestUpdateManager::test_pb027_update_manager_name
+ERROR tests/test_users.py::TestUpdateManager::test_pb028_transfer_manager_to_dept
+ERROR tests/test_users.py::TestManagerStatusManagement::test_pb029_reset_manager_password
+ERROR tests/test_users.py::TestManagerStatusManagement::test_pb030_deactivate_manager
+ERROR tests/test_users.py::TestManagerStatusManagement::test_pb030_deactivated_cannot_login
+ERROR tests/test_users.py::TestManagerStatusManagement::test_pb031_reactivate_manager
+ERROR tests/test_users.py::TestCreateStaff::test_pb033_duplicate_staff_email
+ERROR tests/test_users.py::TestCreateStaff::test_pb034_staff_welcome_email_sent
+ERROR tests/test_users.py::TestManageStaff::test_pb035_list_staff_in_dept - s...
+ERROR tests/test_users.py::TestManageStaff::test_pb036_search_staff_by_name
+ERROR tests/test_users.py::TestManageStaff::test_pb037_update_staff_info - sq...
+ERROR tests/test_users.py::TestManageStaff::test_pb038_manager_resets_staff_password
+ERROR tests/test_users.py::TestManageStaff::test_pb039_deactivate_staff - sql...
+ERROR tests/test_users.py::TestManageStaff::test_pb040_activate_staff - sqlal...
+ERROR tests/test_users.py::TestImportStaff::test_pb042_import_reports_duplicate_email
+ERROR tests/test_users.py::TestImportStaff::test_pb042_import_rejects_non_excel
+ERROR tests/test_users.py::TestProfile::test_pb043_view_own_profile - sqlalch...
+ERROR tests/test_users.py::TestProfile::test_pb044_update_avatar - sqlalchemy...
+ERROR tests/test_users.py::TestProfile::test_pb045_update_phone_valid - sqlal...
+ERROR tests/test_users.py::TestProfile::test_pb045_invalid_phone_rejected - s...
+============ 9 failed, 146 passed, 101 errors in 122.40s (0:02:02) ============
