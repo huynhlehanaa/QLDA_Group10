@@ -62,6 +62,11 @@ from app.models.task import (
     Task, TaskAssignee, TaskComment, TaskAttachment,
     TaskChecklist, TaskHistory, DeadlineExtensionRequest, Epic,
 )
+# Models Sprint 3
+from app.models.kpi import (
+    KpiConfig, KpiCriteria, KpiCriteriaHistory,
+    KpiScore, KpiTarget, KpiFinalize, KpiAppeal, KpiAdjustment,
+)
 
 # ── Test database (SQLite) ─────────────────────────────────────
 TEST_DB_URL = "sqlite:///./test.db"
@@ -101,6 +106,12 @@ def clean_db():
     yield
     db = TestingSession()
     try:
+        # Sprint 1
+        db.query(LoginLog).delete()
+        db.query(Notification).delete()
+        db.query(User).delete()
+        db.query(Department).delete()
+        db.query(Organization).delete()
         # Sprint 2 trước (foreign key)
         db.query(DeadlineExtensionRequest).delete()
         db.query(TaskHistory).delete()
@@ -110,12 +121,15 @@ def clean_db():
         db.query(TaskAssignee).delete()
         db.query(Task).delete()
         db.query(Epic).delete()
-        # Sprint 1
-        db.query(LoginLog).delete()
-        db.query(Notification).delete()
-        db.query(User).delete()
-        db.query(Department).delete()
-        db.query(Organization).delete()
+        # Sprint 3
+        db.query(KpiAdjustment).delete()
+        db.query(KpiAppeal).delete()
+        db.query(KpiFinalize).delete()
+        db.query(KpiTarget).delete()
+        db.query(KpiScore).delete()
+        db.query(KpiCriteriaHistory).delete()
+        db.query(KpiCriteria).delete()
+        db.query(KpiConfig).delete()
         db.commit()
     except Exception:
         db.rollback()
