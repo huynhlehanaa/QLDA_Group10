@@ -68,6 +68,8 @@ from app.models.kpi import (
     KpiScore, KpiTarget, KpiFinalize, KpiAppeal, KpiAdjustment,
 )
 
+from app.models.pwa import PushSubscription, NotificationPreference
+
 # ── Test database (SQLite) ─────────────────────────────────────
 TEST_DB_URL = "sqlite:///./test.db"
 
@@ -106,6 +108,8 @@ def clean_db():
     yield
     db = TestingSession()
     try:
+        db.query(PushSubscription).delete()
+        db.query(NotificationPreference).delete()
         # Sprint 1
         db.query(LoginLog).delete()
         db.query(Notification).delete()
@@ -135,7 +139,6 @@ def clean_db():
         db.rollback()
     finally:
         db.close()
-
 
 @pytest.fixture
 def db():

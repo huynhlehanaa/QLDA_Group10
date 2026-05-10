@@ -5,6 +5,7 @@ from app.api import auth, users, organizations, logs
 from app.api import tasks   # Sprint 2
 from app.api import kpi     # Sprint 3 - KPI Management
 from app.api import dashboard
+from app.api import pwa
 
 app = FastAPI(
     title="KPI Nội Bộ API",
@@ -32,6 +33,7 @@ app.include_router(tasks.router,         prefix="/api/v1")
 # Sprint 3
 app.include_router(kpi.router,           prefix="/api/v1")
 app.include_router(dashboard.router,     prefix="/api/v1")
+app.include_router(pwa.router,           prefix="/api/v1")
 
 @app.get("/")
 def root():
