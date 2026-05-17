@@ -10,6 +10,7 @@ from app.models.kpi import (
     KpiScore, KpiTarget, KpiFinalize, KpiAppeal, KpiAdjustment,
 )
 from app.models.pwa import PushSubscription, NotificationPreference
+from app.models.settings import UserSetting
 
 __all__ = [
     "User", "LoginLog", "Organization", "Department", "Notification",
@@ -17,5 +18,5 @@ __all__ = [
     "TaskChecklist", "TaskHistory", "DeadlineExtensionRequest", "Epic",
     "KpiConfig", "KpiCriteria", "KpiCriteriaHistory",
     "KpiScore", "KpiTarget", "KpiFinalize", "KpiAppeal", "KpiAdjustment",
-    "PushSubscription", "NotificationPreference"
+    "PushSubscription", "NotificationPreference", "UserSetting",
 ]

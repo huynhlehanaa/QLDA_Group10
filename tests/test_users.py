@@ -59,7 +59,7 @@ class TestCreateManager:
 
     def test_pb024_welcome_email_sent(self, client, ceo_user, dept, ceo_token):
         """PB024: gửi email thông báo tài khoản mới"""
-        with patch("app.services.user_service.send_new_manager_email") as mock:
+        with patch("app.services.user_service.send_welcome_email") as mock:
             client.post(
                 "/api/v1/users/managers",
                 json={"full_name": "M", "email": "m@test.com", "dept_id": str(dept.id)},
@@ -244,7 +244,7 @@ class TestCreateStaff:
 
     def test_pb034_staff_welcome_email_sent(self, client, manager_user, manager_token):
         """PB034: gửi email chào mừng nhân viên mới"""
-        with patch("app.services.user_service.send_new_staff_email") as mock:
+        with patch("app.services.user_service.send_welcome_email") as mock:
             client.post(
                 "/api/v1/users/staff",
                 json={"full_name": "NV", "email": "nv2@test.com"},

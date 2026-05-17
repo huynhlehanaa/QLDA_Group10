@@ -62,13 +62,16 @@ from app.models.task import (
     Task, TaskAssignee, TaskComment, TaskAttachment,
     TaskChecklist, TaskHistory, DeadlineExtensionRequest, Epic,
 )
+
 # Models Sprint 3
 from app.models.kpi import (
     KpiConfig, KpiCriteria, KpiCriteriaHistory,
     KpiScore, KpiTarget, KpiFinalize, KpiAppeal, KpiAdjustment,
 )
-
 from app.models.pwa import PushSubscription, NotificationPreference
+
+# Models Sprint 4
+from app.models.settings import UserSetting
 
 # ── Test database (SQLite) ─────────────────────────────────────
 TEST_DB_URL = "sqlite:///./test.db"
@@ -110,6 +113,7 @@ def clean_db():
     try:
         db.query(PushSubscription).delete()
         db.query(NotificationPreference).delete()
+        db.query(UserSetting).delete()
         # Sprint 1
         db.query(LoginLog).delete()
         db.query(Notification).delete()

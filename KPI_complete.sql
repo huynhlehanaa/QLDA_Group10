@@ -399,4 +399,17 @@ CREATE TABLE IF NOT EXISTS "NOTIFICATION_PREFERENCES" (
 
 CREATE INDEX IF NOT EXISTS idx_push_sub_user ON "PUSH_SUBSCRIPTIONS"("user_id");
 
+-- ============================================================
+-- Sprint 4 Migration — Cài đặt & Hệ thống
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS "USER_SETTINGS" (
+  "id"         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  "user_id"    uuid NOT NULL REFERENCES "USERS"("id") UNIQUE,
+  "language"   varchar(10) DEFAULT 'vi',
+  "updated_at" timestamptz DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_settings_user ON "USER_SETTINGS"("user_id");
+
 SELECT 'KPI_complete created successfully!' AS result;

@@ -1,0 +1,60 @@
+============================= test session starts =============================
+collecting ... collected 42 items
+
+tests/test_notifications.py::TestTaskAssignedInApp::test_pb215_notification_created_on_task_assign PASSED [  2%]
+tests/test_notifications.py::TestTaskAssignedInApp::test_pb215_notification_contains_task_info PASSED [  4%]
+tests/test_notifications.py::TestTaskAssignedInApp::test_pb215_all_assignees_notified PASSED [  7%]
+tests/test_notifications.py::TestTaskAssignedInApp::test_pb215_notification_is_unread_by_default PASSED [  9%]
+tests/test_notifications.py::TestTaskAssignedEmail::test_pb216_email_sent_on_task_assign PASSED [ 11%]
+tests/test_notifications.py::TestTaskAssignedEmail::test_pb216_email_sent_to_correct_recipient PASSED [ 14%]
+tests/test_notifications.py::TestTaskAssignedEmail::test_pb216_no_email_if_no_assignees PASSED [ 16%]
+tests/test_notifications.py::TestDeadlineChangedNotification::test_pb217_notification_on_deadline_change PASSED [ 19%]
+tests/test_notifications.py::TestDeadlineChangedNotification::test_pb217_notification_shows_old_and_new_deadline PASSED [ 21%]
+tests/test_notifications.py::TestDeadlineChangedNotification::test_pb217_no_notification_if_deadline_unchanged PASSED [ 23%]
+tests/test_notifications.py::TestReassignNotification::test_pb218_old_assignee_notified_on_reassign PASSED [ 26%]
+tests/test_notifications.py::TestReassignNotification::test_pb218_new_assignee_notified_on_reassign PASSED [ 28%]
+tests/test_notifications.py::TestDeadlineReminders::test_pb219_24h_reminder_created FAILED [ 30%]
+tests/test_notifications.py::TestDeadlineReminders::test_pb219_no_duplicate_24h_reminder FAILED [ 33%]
+tests/test_notifications.py::TestDeadlineReminders::test_pb220_1h_reminder_created PASSED [ 35%]
+tests/test_notifications.py::TestDeadlineReminders::test_pb219_done_task_no_reminder PASSED [ 38%]
+tests/test_notifications.py::TestProgressUpdateNotification::test_pb221_manager_notified_on_progress_update PASSED [ 40%]
+tests/test_notifications.py::TestProgressUpdateNotification::test_pb221_notification_shows_progress_value PASSED [ 42%]
+tests/test_notifications.py::TestCommentNotification::test_pb222_manager_notified_on_comment PASSED [ 45%]
+tests/test_notifications.py::TestCommentNotification::test_pb222_comment_preview_in_notification PASSED [ 47%]
+tests/test_notifications.py::TestCommentNotification::test_pb223_staff_notified_on_manager_reply PASSED [ 50%]
+tests/test_notifications.py::TestOverdueNotification::test_pb224_manager_notified_on_overdue PASSED [ 52%]
+tests/test_notifications.py::TestOverdueNotification::test_pb224_notification_has_staff_and_task_name PASSED [ 54%]
+tests/test_notifications.py::TestOverdueNotification::test_pb224_no_duplicate_overdue_notification PASSED [ 57%]
+tests/test_notifications.py::TestCeoAlerts::test_pb226_ceo_alerted_on_high_overdue_rate PASSED [ 59%]
+tests/test_notifications.py::TestCeoAlerts::test_pb226_no_alert_when_overdue_rate_below_threshold PASSED [ 61%]
+tests/test_notifications.py::TestCeoAlerts::test_pb227_weekly_report_email_sent PASSED [ 64%]
+tests/test_notifications.py::TestNotificationSettings::test_pb228_disable_new_task_notification PASSED [ 66%]
+tests/test_notifications.py::TestNotificationSettings::test_pb228_enabled_notification_still_received PASSED [ 69%]
+tests/test_notifications.py::TestNotificationCenter::test_pb229_get_all_notifications PASSED [ 71%]
+tests/test_notifications.py::TestNotificationCenter::test_pb229_notifications_sorted_by_time PASSED [ 73%]
+tests/test_notifications.py::TestNotificationCenter::test_pb229_read_unread_distinction PASSED [ 76%]
+tests/test_notifications.py::TestNotificationCenter::test_pb229_mark_single_notification_read PASSED [ 78%]
+tests/test_notifications.py::TestNotificationCenter::test_pb229_pagination PASSED [ 80%]
+tests/test_notifications.py::TestMarkAllRead::test_pb230_mark_all_read PASSED [ 83%]
+tests/test_notifications.py::TestMarkAllRead::test_pb230_unread_count_zero_after_mark_all PASSED [ 85%]
+tests/test_notifications.py::TestNotificationFilter::test_pb231_filter_by_type_task PASSED [ 88%]
+tests/test_notifications.py::TestNotificationFilter::test_pb231_filter_by_type_kpi PASSED [ 90%]
+tests/test_notifications.py::TestNotificationFilter::test_pb231_filter_unread_only PASSED [ 92%]
+tests/test_notifications.py::TestAutoCleanNotifications::test_pb232_old_notifications_deleted PASSED [ 95%]
+tests/test_notifications.py::TestAutoCleanNotifications::test_pb232_recent_notifications_preserved PASSED [ 97%]
+tests/test_notifications.py::TestAutoCleanNotifications::test_pb232_returns_deleted_count PASSED [100%]
+
+================================== FAILURES ===================================
+____________ TestDeadlineReminders.test_pb219_24h_reminder_created ____________
+tests\test_notifications.py:337: in test_pb219_24h_reminder_created
+    assert count >= 1
+E   assert 0 >= 1
+_________ TestDeadlineReminders.test_pb219_no_duplicate_24h_reminder __________
+tests\test_notifications.py:368: in test_pb219_no_duplicate_24h_reminder
+    assert count == 1  # ch\u1ec9 1 notification
+    ^^^^^^^^^^^^^^^^^
+E   assert 0 == 1
+=========================== short test summary info ===========================
+FAILED tests/test_notifications.py::TestDeadlineReminders::test_pb219_24h_reminder_created
+FAILED tests/test_notifications.py::TestDeadlineReminders::test_pb219_no_duplicate_24h_reminder
+======================== 2 failed, 40 passed in 37.65s ========================

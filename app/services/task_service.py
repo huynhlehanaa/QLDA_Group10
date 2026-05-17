@@ -21,6 +21,9 @@ from app.schemas.task import (
     CommentCreate, ChecklistCreate, ChecklistUpdate,
     ExtensionRequestCreate, ExtensionReview,
 )
+from app.services.notification_service import notify_task_assigned
+from app.services.notification_service import notify_progress_updated
+from app.services.notification_service import notify_new_comment, notify_comment_reply
 
 
 # ── Helpers ───────────────────────────────────────────────────
@@ -179,6 +182,13 @@ def create_task(data: TaskCreate, user: User, db: Session) -> Task:
 
     _log_history(db, task.id, user.id, "created", "", task.title)
     db.commit()
+
+    if data.assignee_ids:
+        notify_task_assigned(
+            task.id, task.title, data.assignee_ids,
+            user.full_name, task.deadline, db,
+        )
+
     db.refresh(task)
     return task
 
@@ -389,6 +399,9 @@ def update_task(task_id: UUID, data: TaskUpdate, user: User, db: Session) -> Tas
     task = _get_task_or_404(db, task_id)
     _assert_manager_of_dept(user, task.dept_id)
 
+    old_deadline = task.deadline
+    old_assignee_ids = [ta.user_id for ta in task.assignees]
+
     if data.title is not None:
         _log_history(db, task_id, user.id, "title", task.title, data.title)
         task.title = data.title
@@ -414,6 +427,21 @@ def update_task(task_id: UUID, data: TaskUpdate, user: User, db: Session) -> Tas
                      "", ", ".join(str(x) for x in data.assignee_ids))
 
     db.commit()
+
+    # PB217: deadline changed
+    if data.deadline is not None and old_deadline != data.deadline:
+        from app.services.notification_service import notify_deadline_changed
+        assignee_ids = [ta.user_id for ta in task.assignees]
+        if assignee_ids:
+            notify_deadline_changed(task.id, task.title, assignee_ids,
+                                    old_deadline, data.deadline, db)
+
+    # PB218: reassigned
+    if data.assignee_ids is not None:
+        from app.services.notification_service import notify_task_reassigned
+        notify_task_reassigned(task.id, task.title,
+                            old_assignee_ids, data.assignee_ids, db)
+    
     db.refresh(task)
     return task
 
@@ -425,6 +453,7 @@ def update_status(task_id: UUID, status: str, progress_pct: Optional[int],
     _assert_assignee_or_manager(user, task, db)
 
     old_status = task.status
+    old_progress = task.progress_pct
     now = datetime.now(timezone.utc)
 
     # PB086: done → ghi timestamp
@@ -444,6 +473,10 @@ def update_status(task_id: UUID, status: str, progress_pct: Optional[int],
         task.status = status
 
     db.commit()
+    if progress_pct is not None and progress_pct != old_progress:
+        notify_progress_updated(task.id, task.title, task.dept_id,
+                                user.full_name, progress_pct, db)
+    
     db.refresh(task)
     return task
 
@@ -497,6 +530,16 @@ def add_comment(task_id: UUID, data: CommentCreate, user: User, db: Session) -> 
     )
     db.add(comment)
     db.commit()
+    
+    if data.parent_id:
+        parent = db.query(TaskComment).filter(TaskComment.id == data.parent_id).first()
+        if parent:
+            notify_comment_reply(task.id, task.title, parent.user_id,
+                                user.full_name, data.content, db)
+    else:
+        notify_new_comment(task.id, task.title, task.dept_id,
+                        user.full_name, data.content, user.id, db)
+        
     db.refresh(comment)
     return comment
 
