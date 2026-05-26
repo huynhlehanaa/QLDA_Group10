@@ -28,13 +28,18 @@ export default function TasksPage() {
   const [deadline, setDeadline] = useState('');
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
   const [assigneeId, setAssigneeId] = useState('');
+  const [ready, setReady] = useState(false);
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async (filters?: { search?: string; status?: string; priority?: string }) => {
     if (!accessToken) return;
+    const taskSearch = filters?.search ?? search;
+    const taskStatus = filters?.status ?? statusFilter;
+    const taskPriority = filters?.priority ?? priorityFilter;
+
     const [tasksData, statsData, kanbanData] = await Promise.all([
-      fetchTasks({ search, status: statusFilter, priority: priorityFilter }),
+      fetchTasks({ search: taskSearch, status: taskStatus, priority: taskPriority }),
       fetchStats(),
-      fetchKanban({ search, priority: priorityFilter })
+      fetchKanban({ search: taskSearch, priority: taskPriority })
     ]);
     setTasks(tasksData);
     setStats(statsData);
@@ -62,9 +67,23 @@ export default function TasksPage() {
       } catch {
         setStaff([]);
       }
-      await loadData();
+      setReady(true);
     }).catch(() => router.replace('/auth/login'));
-  }, [accessToken, loadData, router]);
+  }, [accessToken, router]);
+
+  useEffect(() => {
+    if (!ready) return;
+    loadData().catch(() => setError('Không tải được dữ liệu task.'));
+  }, [ready, search, statusFilter, priorityFilter, loadData]);
+
+  function normalizeDeadline(value: string) {
+    if (!value) return undefined;
+    const normalized = value.length === 16 ? `${value}:00` : value;
+    if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(normalized)) {
+      throw new Error('Định dạng deadline không hợp lệ.');
+    }
+    return normalized;
+  }
 
   async function onCreateTask(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -81,7 +100,7 @@ export default function TasksPage() {
         title,
         description: description || undefined,
         assignee_ids: assigneeId ? [assigneeId] : [],
-        deadline: deadline ? `${deadline}:00` : undefined,
+        deadline: normalizeDeadline(deadline),
         priority
       });
       setNotice(created.warning || 'Tạo task thành công.');
