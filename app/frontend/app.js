@@ -39,7 +39,7 @@ async function refreshAccessToken() {
 
 async function api(path, options = {}, retry = true) {
   const headers = { ...(options.headers || {}) };
-  if (state.accessToken) headers.Authorization = `******;
+  if (state.accessToken) headers.Authorization = 'Bearer ' + state.accessToken;
   if (!headers['Content-Type'] && options.body && !(options.body instanceof FormData)) {
     headers['Content-Type'] = 'application/json';
   }
