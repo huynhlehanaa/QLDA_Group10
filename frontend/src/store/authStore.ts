@@ -66,15 +66,21 @@ export const authStore = {
         this.clear();
         return null;
       }
-      const tokenData = await refreshToken(this.state.refreshToken);
-      this.setState({
-        accessToken: tokenData.access_token,
-        refreshToken: tokenData.refresh_token
-      });
-      writeSession(ACCESS_TOKEN_KEY, tokenData.access_token);
-      writeSession(REFRESH_TOKEN_KEY, tokenData.refresh_token);
-      this.setState({ me: await fetchMe(tokenData.access_token) });
-      return this.state.me;
+      try {
+        const tokenData = await refreshToken(this.state.refreshToken);
+        this.setState({
+          accessToken: tokenData.access_token,
+          refreshToken: tokenData.refresh_token
+        });
+        writeSession(ACCESS_TOKEN_KEY, tokenData.access_token);
+        writeSession(REFRESH_TOKEN_KEY, tokenData.refresh_token);
+        this.setState({ me: await fetchMe(tokenData.access_token) });
+        return this.state.me;
+      } catch (error) {
+        console.error('Token refresh failed', error);
+        this.clear();
+        return null;
+      }
     }
   },
 
@@ -82,8 +88,8 @@ export const authStore = {
     if (this.state.accessToken && this.state.refreshToken) {
       try {
         await logout(this.state.accessToken, this.state.refreshToken);
-      } catch {
-        // ignore logout failure
+      } catch (error) {
+        console.error('Logout request failed', error);
       }
     }
     this.clear();

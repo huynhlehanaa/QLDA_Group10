@@ -18,7 +18,7 @@ export default function LoginPage() {
         setNotice(`Đã đăng nhập với vai trò ${me.role.toUpperCase()}.`);
       }
     }).catch(() => undefined);
-  }, [router]);
+  }, []);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
