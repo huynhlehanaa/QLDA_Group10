@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 
 from app.api import auth, users, organizations, logs
 from app.api import tasks   # Sprint 2
@@ -25,7 +24,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.mount("/portal", StaticFiles(directory="app/frontend", html=True), name="portal")
 
 # Sprint 1
 app.include_router(auth.router,          prefix="/api/v1")

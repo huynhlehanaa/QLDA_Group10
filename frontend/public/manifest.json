@@ -1,0 +1,9 @@
+{
+  "name": "KPI Manager Portal",
+  "short_name": "KPI Portal",
+  "start_url": "/auth/login",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "icons": []
+}
