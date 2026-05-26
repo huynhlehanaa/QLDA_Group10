@@ -154,7 +154,7 @@ export default function TasksPage() {
       <section style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 8, padding: 16, display: 'grid', gap: 12 }}>
         <h2 style={{ margin: 0, fontSize: 18 }}>Bộ lọc</h2>
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr auto', gap: 8 }}>
-          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Tìm theo tiêu đề task" style={{ padding: 8, border: '1px solid #cbd5e1', borderRadius: 6 }} />
+          <input aria-label="Tìm kiếm task" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Tìm theo tiêu đề task" style={{ padding: 8, border: '1px solid #cbd5e1', borderRadius: 6 }} />
           <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} style={{ padding: 8, border: '1px solid #cbd5e1', borderRadius: 6 }}>
             <option value="">Tất cả trạng thái</option>
             <option value="todo">Todo</option>

@@ -211,8 +211,8 @@ export default function KpiPage() {
       <section style={cardStyle}>
         <h2 style={{ margin: 0, fontSize: 18 }}>Kỳ đánh giá</h2>
         <div style={{ display: 'flex', gap: 8 }}>
-          <input type="number" value={year} onChange={(e) => setYear(Number(e.target.value || now.getFullYear()))} style={inputStyle} />
-          <input type="number" min={1} max={12} value={month} onChange={(e) => setMonth(Number(e.target.value || now.getMonth() + 1))} style={inputStyle} />
+          <input aria-label="Năm đánh giá" type="number" value={year} onChange={(e) => setYear(Number(e.target.value || now.getFullYear()))} style={inputStyle} />
+          <input aria-label="Tháng đánh giá" type="number" min={1} max={12} value={month} onChange={(e) => setMonth(Number(e.target.value || now.getMonth() + 1))} style={inputStyle} />
           <button type="button" onClick={() => loadKpiData()} style={btnPrimary}>Tải dữ liệu</button>
         </div>
       </section>

@@ -51,6 +51,7 @@ export default function LoginPage() {
         <h1 style={{ marginTop: 0 }}>Đăng nhập CEO / Manager</h1>
         <form onSubmit={onSubmit} style={{ display: 'grid', gap: 10 }}>
           <input
+            aria-label="Email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -59,6 +60,7 @@ export default function LoginPage() {
             style={{ padding: 10, borderRadius: 6, border: '1px solid #d1d5db' }}
           />
           <input
+            aria-label="Mật khẩu"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
