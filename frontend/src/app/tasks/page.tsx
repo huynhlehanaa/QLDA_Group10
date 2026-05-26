@@ -133,13 +133,22 @@ export default function TasksPage() {
           <h1 style={{ margin: 0 }}>Quản lý Task</h1>
           <p style={{ margin: '4px 0 0', color: '#475569' }}>Xin chào {me?.full_name || 'Manager'}</p>
         </div>
-        <button
-          type="button"
-          onClick={() => authStore.signOut().then(() => router.replace('/auth/login'))}
-          style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #cbd5e1', background: '#fff' }}
-        >
-          Đăng xuất
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            type="button"
+            onClick={() => router.push('/kpi')}
+            style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #cbd5e1', background: '#fff' }}
+          >
+            KPI
+          </button>
+          <button
+            type="button"
+            onClick={() => authStore.signOut().then(() => router.replace('/auth/login'))}
+            style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #cbd5e1', background: '#fff' }}
+          >
+            Đăng xuất
+          </button>
+        </div>
       </header>
 
       <section style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 8, padding: 16, display: 'grid', gap: 12 }}>
