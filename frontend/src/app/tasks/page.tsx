@@ -81,7 +81,7 @@ export default function TasksPage() {
         title,
         description: description || undefined,
         assignee_ids: assigneeId ? [assigneeId] : [],
-        deadline: deadline ? new Date(deadline).toISOString() : undefined,
+        deadline: deadline ? `${deadline}:00` : undefined,
         priority
       });
       setNotice(created.warning || 'Tạo task thành công.');

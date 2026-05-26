@@ -57,6 +57,13 @@ export interface CreateTaskPayload {
   priority: TaskPriority;
 }
 
+export interface CreateTaskResponse {
+  id: string;
+  title: string;
+  status: TaskStatus;
+  warning?: string;
+}
+
 type TaskFilters = {
   search?: string;
   status?: string;
@@ -107,7 +114,7 @@ export function useTasks() {
   const createTask = useCallback(async (payload: CreateTaskPayload) => {
     setLoading(true);
     try {
-      return await apiRequest<{ id: string; title: string; status: TaskStatus; warning?: string }>('/api/v1/tasks', {
+      return await apiRequest<CreateTaskResponse>('/api/v1/tasks', {
         method: 'POST',
         token: accessToken,
         body: payload
