@@ -6,6 +6,8 @@ type AuthState = {
   me: UserProfile | null;
 };
 
+type AuthListener = () => void;
+
 const ACCESS_TOKEN_KEY = 'kpi_access_token';
 const REFRESH_TOKEN_KEY = 'kpi_refresh_token';
 
@@ -26,21 +28,38 @@ export const authStore = {
     refreshToken: readSession(REFRESH_TOKEN_KEY),
     me: null
   } as AuthState,
+  listeners: new Set<AuthListener>(),
+
+  setState(partial: Partial<AuthState>) {
+    this.state = { ...this.state, ...partial };
+    this.listeners.forEach((listener) => listener());
+  },
+
+  subscribe(listener: AuthListener) {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  },
+
+  getSnapshot() {
+    return this.state;
+  },
 
   async signIn(email: string, password: string) {
     const data = await login(email, password);
-    this.state.accessToken = data.access_token;
-    this.state.refreshToken = data.refresh_token;
+    this.setState({
+      accessToken: data.access_token,
+      refreshToken: data.refresh_token
+    });
     writeSession(ACCESS_TOKEN_KEY, data.access_token);
     writeSession(REFRESH_TOKEN_KEY, data.refresh_token);
-    this.state.me = await fetchMe(data.access_token);
+    this.setState({ me: await fetchMe(data.access_token) });
     return this.state.me;
   },
 
   async bootstrap() {
     if (!this.state.accessToken) return null;
     try {
-      this.state.me = await fetchMe(this.state.accessToken);
+      this.setState({ me: await fetchMe(this.state.accessToken) });
       return this.state.me;
     } catch {
       if (!this.state.refreshToken) {
@@ -48,11 +67,13 @@ export const authStore = {
         return null;
       }
       const tokenData = await refreshToken(this.state.refreshToken);
-      this.state.accessToken = tokenData.access_token;
-      this.state.refreshToken = tokenData.refresh_token;
+      this.setState({
+        accessToken: tokenData.access_token,
+        refreshToken: tokenData.refresh_token
+      });
       writeSession(ACCESS_TOKEN_KEY, tokenData.access_token);
       writeSession(REFRESH_TOKEN_KEY, tokenData.refresh_token);
-      this.state.me = await fetchMe(tokenData.access_token);
+      this.setState({ me: await fetchMe(tokenData.access_token) });
       return this.state.me;
     }
   },
@@ -69,9 +90,7 @@ export const authStore = {
   },
 
   clear() {
-    this.state.accessToken = '';
-    this.state.refreshToken = '';
-    this.state.me = null;
+    this.setState({ accessToken: '', refreshToken: '', me: null });
     writeSession(ACCESS_TOKEN_KEY, '');
     writeSession(REFRESH_TOKEN_KEY, '');
   }

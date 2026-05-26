@@ -27,6 +27,10 @@ export default function LoginPage() {
 
     try {
       const me = await authStore.signIn(email, password);
+      if (!me) {
+        setError('Không lấy được thông tin người dùng.');
+        return;
+      }
       if (me.role !== 'ceo' && me.role !== 'manager') {
         await authStore.signOut();
         setError('Chỉ CEO hoặc Manager mới được truy cập frontend này.');

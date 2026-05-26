@@ -2,15 +2,16 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { createNotificationSocket } from '@/lib/websocket';
-import { authStore } from '@/store/authStore';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export function useNotifications() {
+  const { accessToken } = useAuthStore();
   const [messages, setMessages] = useState<string[]>([]);
   const socketRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    if (!authStore.state.accessToken) return;
-    const ws = createNotificationSocket(authStore.state.accessToken);
+    if (!accessToken) return;
+    const ws = createNotificationSocket(accessToken);
     socketRef.current = ws;
 
     ws.onmessage = (event) => {
@@ -21,7 +22,7 @@ export function useNotifications() {
       ws.close();
       socketRef.current = null;
     };
-  }, []);
+  }, [accessToken]);
 
   return { messages };
 }
