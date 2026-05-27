@@ -150,6 +150,27 @@ export default function TasksPage() {
           </button>
           <button
             type="button"
+            onClick={() => router.push('/settings')}
+            style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #cbd5e1', background: '#fff' }}
+          >
+            Cài đặt
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push('/notifications')}
+            style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #cbd5e1', background: '#fff' }}
+          >
+            Thông báo
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push('/onboarding')}
+            style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #cbd5e1', background: '#fff' }}
+          >
+            Onboarding
+          </button>
+          <button
+            type="button"
             onClick={() => authStore.signOut().then(() => router.replace('/auth/login'))}
             style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #cbd5e1', background: '#fff' }}
           >

@@ -211,6 +211,9 @@ export default function DashboardPage() {
         <div style={{ display: 'flex', gap: 8 }}>
           <button type="button" onClick={() => router.push('/tasks')} style={btnSecondary}>Task</button>
           <button type="button" onClick={() => router.push('/kpi')} style={btnSecondary}>KPI</button>
+          <button type="button" onClick={() => router.push('/settings')} style={btnSecondary}>Cài đặt</button>
+          <button type="button" onClick={() => router.push('/notifications')} style={btnSecondary}>Thông báo</button>
+          <button type="button" onClick={() => router.push('/onboarding')} style={btnSecondary}>Onboarding</button>
           <button type="button" onClick={() => authStore.signOut().then(() => router.replace('/auth/login'))} style={btnSecondary}>Đăng xuất</button>
         </div>
       </header>
