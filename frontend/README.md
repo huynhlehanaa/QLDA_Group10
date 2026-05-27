@@ -59,7 +59,6 @@ npm run start
 - `npm run dev`: chạy môi trường development
 - `npm run build`: build ứng dụng
 - `npm run start`: chạy ứng dụng sau khi build
-- `npm run lint`: kiểm tra mã nguồn
 
 ## 7. Lưu ý
 
