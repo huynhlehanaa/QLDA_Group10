@@ -30,9 +30,16 @@ export default function KpiPage() {
     fetchDeptSummary,
     fetchDeptScores,
     fetchDistribution,
+    fetchDeptRanking,
     createAppeal,
     createAdjustment,
-    fetchAdjustmentHistory
+    fetchAdjustmentHistory,
+    finalizeKpi,
+    unlockKpi,
+    respondAppeal,
+    reviewAdjustment,
+    exportDeptExcel,
+    exportCompanyExcel
   } = useKpi();
 
   const now = new Date();
@@ -45,6 +52,7 @@ export default function KpiPage() {
   const [compare, setCompare] = useState<KpiCompareResult | null>(null);
   const [deptSummary, setDeptSummary] = useState<DeptKpiSummary | null>(null);
   const [deptScores, setDeptScores] = useState<DeptScoreItem[]>([]);
+  const [deptRanking, setDeptRanking] = useState<DeptScoreItem[]>([]);
   const [distribution, setDistribution] = useState<GradeDistribution | null>(null);
   const [adjustmentHistory, setAdjustmentHistory] = useState<KpiAdjustmentHistoryItem[]>([]);
   const [staff, setStaff] = useState<StaffOption[]>([]);
@@ -59,6 +67,14 @@ export default function KpiPage() {
   const [adjustCriteria, setAdjustCriteria] = useState('');
   const [adjustProposedScore, setAdjustProposedScore] = useState('0');
   const [adjustReason, setAdjustReason] = useState('');
+  const [appealIdToRespond, setAppealIdToRespond] = useState('');
+  const [appealResponseText, setAppealResponseText] = useState('');
+  const [appealAdjustedScore, setAppealAdjustedScore] = useState('');
+  const [appealApprove, setAppealApprove] = useState('approve');
+  const [reviewAdjId, setReviewAdjId] = useState('');
+  const [reviewApprove, setReviewApprove] = useState('approve');
+  const [reviewComment, setReviewComment] = useState('');
+  const [unlockReason, setUnlockReason] = useState('');
 
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
@@ -75,19 +91,22 @@ export default function KpiPage() {
     setCompare(compareRes);
 
     if (me?.role === 'manager' || me?.role === 'ceo') {
-      const [summaryRes, scoresRes, distributionRes, adjustmentRes] = await Promise.all([
+      const [summaryRes, scoresRes, rankingRes, distributionRes, adjustmentRes] = await Promise.all([
         fetchDeptSummary(year, month),
         fetchDeptScores(year, month),
+        fetchDeptRanking(year, month),
         fetchDistribution(year, month),
         fetchAdjustmentHistory()
       ]);
       setDeptSummary(summaryRes);
       setDeptScores(scoresRes);
+      setDeptRanking(rankingRes);
       setDistribution(distributionRes);
       setAdjustmentHistory(adjustmentRes);
     } else {
       setDeptSummary(null);
       setDeptScores([]);
+      setDeptRanking([]);
       setDistribution(null);
       setAdjustmentHistory([]);
     }
@@ -95,6 +114,7 @@ export default function KpiPage() {
     accessToken,
     fetchCompare,
     fetchDeptScores,
+    fetchDeptRanking,
     fetchDeptSummary,
     fetchDistribution,
     fetchHistory,
@@ -154,7 +174,7 @@ export default function KpiPage() {
     setError('');
     setNotice('');
     try {
-      await createAppeal({
+      const result = await createAppeal({
         year,
         month,
         criteria_name: appealCriteria,
@@ -162,7 +182,7 @@ export default function KpiPage() {
         proposed_score: Number(appealProposedScore),
         reason: appealReason
       });
-      setNotice('Đã gửi khiếu nại KPI.');
+      setNotice('Đã gửi khiếu nại KPI. Mã khiếu nại: ' + (result.id || ''));
       setAppealCriteria('');
       setAppealCurrentScore('0');
       setAppealProposedScore('0');
@@ -177,7 +197,7 @@ export default function KpiPage() {
     setError('');
     setNotice('');
     try {
-      await createAdjustment({
+      const result = await createAdjustment({
         user_id: adjustUserId,
         year,
         month,
@@ -185,13 +205,98 @@ export default function KpiPage() {
         proposed_score: Number(adjustProposedScore),
         reason: adjustReason
       });
-      setNotice('Đã gửi yêu cầu điều chỉnh KPI.');
+      setNotice('Đã gửi yêu cầu điều chỉnh KPI. Mã yêu cầu: ' + (result.id || ''));
       setAdjustCriteria('');
       setAdjustProposedScore('0');
       setAdjustReason('');
       await loadKpiData();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Gửi điều chỉnh thất bại');
+    }
+  }
+
+  async function onRespondAppeal(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError('');
+    setNotice('');
+    try {
+      await respondAppeal(appealIdToRespond, {
+        approved: appealApprove === 'approve',
+        response: appealResponseText,
+        adjusted_score: appealApprove === 'approve' && appealAdjustedScore !== '' ? Number(appealAdjustedScore) : undefined
+      });
+      setNotice('Đã phản hồi khiếu nại KPI.');
+      setAppealIdToRespond('');
+      setAppealResponseText('');
+      setAppealAdjustedScore('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Phản hồi khiếu nại thất bại');
+    }
+  }
+
+  async function onReviewAdjustment(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError('');
+    setNotice('');
+    try {
+      await reviewAdjustment(reviewAdjId, {
+        approved: reviewApprove === 'approve',
+        comment: reviewComment || undefined
+      });
+      setNotice('Đã xử lý yêu cầu điều chỉnh KPI.');
+      setReviewAdjId('');
+      setReviewComment('');
+      await loadKpiData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Duyệt điều chỉnh thất bại');
+    }
+  }
+
+  async function onFinalizeKpi() {
+    setError('');
+    setNotice('');
+    try {
+      await finalizeKpi(year, month);
+      setNotice(`Đã chốt KPI tháng ${month}/${year}.`);
+      await loadKpiData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Chốt KPI thất bại');
+    }
+  }
+
+  async function onUnlockKpi(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError('');
+    setNotice('');
+    try {
+      await unlockKpi(year, month, unlockReason);
+      setNotice(`Đã mở khóa KPI tháng ${month}/${year}.`);
+      setUnlockReason('');
+      await loadKpiData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Mở khóa KPI thất bại');
+    }
+  }
+
+  async function onExportDept() {
+    setError('');
+    setNotice('');
+    try {
+      await exportDeptExcel(year, month);
+      setNotice('Đã tải file Excel KPI phòng ban.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Xuất Excel phòng ban thất bại');
+    }
+  }
+
+  async function onExportCompany(monthly: boolean) {
+    setError('');
+    setNotice('');
+    try {
+      await exportCompanyExcel(year, monthly ? month : undefined);
+      setNotice(`Đã tải file Excel KPI công ty ${monthly ? 'tháng' : 'năm'}.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Xuất Excel công ty thất bại');
     }
   }
 
@@ -311,6 +416,29 @@ export default function KpiPage() {
               </tbody>
             </table>
           </div>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ textAlign: 'left', background: '#f8fafc' }}>
+                  <th style={{ padding: 8 }}>Top</th>
+                  <th style={{ padding: 8 }}>Nhân viên</th>
+                  <th style={{ padding: 8 }}>Điểm</th>
+                </tr>
+              </thead>
+              <tbody>
+                {deptRanking.slice(0, 5).map((item, index) => (
+                  <tr key={item.user_id} style={{ borderTop: '1px solid #e2e8f0' }}>
+                    <td style={{ padding: 8 }}>#{index + 1}</td>
+                    <td style={{ padding: 8 }}>{item.full_name}</td>
+                    <td style={{ padding: 8 }}>{item.total_score}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button type="button" onClick={onExportDept} disabled={loading} style={btnSecondary}>Xuất Excel phòng ban</button>
+          </div>
         </section>
       ) : null}
 
@@ -327,6 +455,22 @@ export default function KpiPage() {
             <input required type="number" step="0.1" value={adjustProposedScore} onChange={(e) => setAdjustProposedScore(e.target.value)} placeholder="Điểm đề xuất" style={inputStyle} />
             <input required value={adjustReason} onChange={(e) => setAdjustReason(e.target.value)} placeholder="Lý do điều chỉnh" style={inputStyle} />
             <button type="submit" disabled={loading || !adjustUserId} style={btnPrimary}>Gửi</button>
+          </form>
+        </section>
+      ) : null}
+
+      {me?.role === 'manager' ? (
+        <section style={cardStyle}>
+          <h2 style={{ margin: 0, fontSize: 18 }}>Phản hồi khiếu nại KPI (Manager)</h2>
+          <form onSubmit={onRespondAppeal} style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1.2fr 1fr auto', gap: 8 }}>
+            <input required value={appealIdToRespond} onChange={(e) => setAppealIdToRespond(e.target.value)} placeholder="Mã khiếu nại" style={inputStyle} />
+            <select value={appealApprove} onChange={(e) => setAppealApprove(e.target.value)} style={inputStyle}>
+              <option value="approve">Duyệt</option>
+              <option value="reject">Từ chối</option>
+            </select>
+            <input required value={appealResponseText} onChange={(e) => setAppealResponseText(e.target.value)} placeholder="Phản hồi" style={inputStyle} />
+            <input value={appealAdjustedScore} onChange={(e) => setAppealAdjustedScore(e.target.value)} type="number" step="0.1" placeholder="Điểm điều chỉnh" style={inputStyle} />
+            <button type="submit" disabled={loading} style={btnPrimary}>Gửi</button>
           </form>
         </section>
       ) : null}
@@ -358,6 +502,36 @@ export default function KpiPage() {
               </tbody>
             </table>
           </div>
+        </section>
+      ) : null}
+
+      {me?.role === 'ceo' ? (
+        <section style={cardStyle}>
+          <h2 style={{ margin: 0, fontSize: 18 }}>Phê duyệt điều chỉnh KPI (CEO)</h2>
+          <form onSubmit={onReviewAdjustment} style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 2fr auto', gap: 8 }}>
+            <input required value={reviewAdjId} onChange={(e) => setReviewAdjId(e.target.value)} placeholder="Mã yêu cầu điều chỉnh" style={inputStyle} />
+            <select value={reviewApprove} onChange={(e) => setReviewApprove(e.target.value)} style={inputStyle}>
+              <option value="approve">Duyệt</option>
+              <option value="reject">Từ chối</option>
+            </select>
+            <input value={reviewComment} onChange={(e) => setReviewComment(e.target.value)} placeholder="Ghi chú" style={inputStyle} />
+            <button type="submit" disabled={loading} style={btnPrimary}>Xử lý</button>
+          </form>
+        </section>
+      ) : null}
+
+      {me?.role === 'ceo' ? (
+        <section style={cardStyle}>
+          <h2 style={{ margin: 0, fontSize: 18 }}>Chốt & mở khóa KPI (CEO)</h2>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button type="button" onClick={onFinalizeKpi} disabled={loading} style={btnPrimary}>Chốt KPI tháng</button>
+            <button type="button" onClick={() => onExportCompany(true)} disabled={loading} style={btnSecondary}>Xuất Excel công ty (tháng)</button>
+            <button type="button" onClick={() => onExportCompany(false)} disabled={loading} style={btnSecondary}>Xuất Excel công ty (năm)</button>
+          </div>
+          <form onSubmit={onUnlockKpi} style={{ display: 'grid', gridTemplateColumns: '2fr auto', gap: 8 }}>
+            <input required value={unlockReason} onChange={(e) => setUnlockReason(e.target.value)} placeholder="Lý do mở khóa KPI" style={inputStyle} />
+            <button type="submit" disabled={loading} style={btnPrimary}>Mở khóa KPI</button>
+          </form>
         </section>
       ) : null}
 
