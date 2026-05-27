@@ -308,6 +308,7 @@ export default function KpiPage() {
           <p style={{ margin: '4px 0 0', color: '#475569' }}>Xin chào {me?.full_name || 'User'}</p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
+          <button type="button" onClick={() => router.push('/dashboard')} style={btnSecondary}>Dashboard</button>
           <button type="button" onClick={() => router.push('/tasks')} style={btnSecondary}>Task</button>
           <button type="button" onClick={() => authStore.signOut().then(() => router.replace('/auth/login'))} style={btnSecondary}>Đăng xuất</button>
         </div>

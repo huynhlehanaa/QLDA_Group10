@@ -136,6 +136,13 @@ export default function TasksPage() {
         <div style={{ display: 'flex', gap: 8 }}>
           <button
             type="button"
+            onClick={() => router.push('/dashboard')}
+            style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #cbd5e1', background: '#fff' }}
+          >
+            Dashboard
+          </button>
+          <button
+            type="button"
             onClick={() => router.push('/kpi')}
             style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #cbd5e1', background: '#fff' }}
           >
