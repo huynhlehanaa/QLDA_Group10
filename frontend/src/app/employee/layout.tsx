@@ -30,6 +30,9 @@ export default function EmployeeLayout({ children }: { children: React.ReactNode
               <span className="badge">{roleLabel}</span>
               {fullName ? <span className="badge">{fullName}</span> : null}
             </div>
+            <Link className="ghost-button" href="/employee/tasks/list">
+              Công việc
+            </Link>
             <Link className="ghost-button" href="/employee/profile">
               Hồ sơ
             </Link>
