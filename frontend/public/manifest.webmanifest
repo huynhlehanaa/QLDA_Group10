@@ -1,0 +1,18 @@
+{
+  "name": "KPI Nội Bộ",
+  "short_name": "KPI",
+  "description": "Hệ thống quản lý KPI nội bộ cho nhân viên",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0f766e",
+  "lang": "vi",
+  "icons": [
+    {
+      "src": "/icons.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
