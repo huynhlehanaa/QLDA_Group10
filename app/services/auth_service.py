@@ -53,11 +53,13 @@ def _log(db: Session, user_id: Optional[UUID], email: str, success: bool, reques
     db.commit()
 
 
-def _serialize_refresh_session(user_id: str, session_expires_at: datetime) -> str:
+def _serialize_refresh_session(user_id: str, session_expires_at: Optional[datetime]) -> str:
+    if session_expires_at and session_expires_at.tzinfo is None:
+        session_expires_at = session_expires_at.replace(tzinfo=timezone.utc)
     return json.dumps(
         {
             "user_id": user_id,
-            "session_expires_at": session_expires_at.isoformat(),
+            "session_expires_at": session_expires_at.isoformat() if session_expires_at else None,
         }
     )
 
@@ -199,7 +201,7 @@ def refresh_token(token: str) -> dict:
     _r().setex(
         f"{_REFRESH_PREFIX}{new_refresh}",
         ttl,
-        _serialize_refresh_session(stored["user_id"], session_expires_at) if session_expires_at else json.dumps({"user_id": stored["user_id"]}),
+        _serialize_refresh_session(stored["user_id"], session_expires_at),
     )
 
     return {

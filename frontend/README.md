@@ -11,7 +11,7 @@
 Di chuyển vào thư mục front-end và cài dependencies:
 
 ```bash
-cd /tmp/workspace/huynhlehanaa/QLDA_Group10/frontend
+cd frontend
 npm ci
 ```
 
@@ -30,7 +30,7 @@ Nếu không tạo file này, ứng dụng vẫn mặc định dùng `http://loc
 ## 4. Chạy ở môi trường phát triển
 
 ```bash
-cd /tmp/workspace/huynhlehanaa/QLDA_Group10/frontend
+cd frontend
 npm run dev
 ```
 
@@ -43,14 +43,14 @@ Sau khi chạy thành công, mở trình duyệt tại:
 ### Build
 
 ```bash
-cd /tmp/workspace/huynhlehanaa/QLDA_Group10/frontend
+cd frontend
 npm run build
 ```
 
 ### Chạy production
 
 ```bash
-cd /tmp/workspace/huynhlehanaa/QLDA_Group10/frontend
+cd frontend
 npm run start
 ```
 

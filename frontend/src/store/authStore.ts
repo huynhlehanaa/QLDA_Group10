@@ -97,11 +97,10 @@ export const authStore = {
       }
       try {
         const tokenData = await refreshToken(this.state.refreshToken);
-        const resolvedSessionExpiresAt = tokenData.session_expires_at || this.state.sessionExpiresAt;
-        if (!resolvedSessionExpiresAt) {
-          this.clear();
-          return null;
-        }
+        const resolvedSessionExpiresAt =
+          tokenData.session_expires_at ||
+          this.state.sessionExpiresAt ||
+          new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString();
         this.setState({
           accessToken: tokenData.access_token,
           refreshToken: tokenData.refresh_token,

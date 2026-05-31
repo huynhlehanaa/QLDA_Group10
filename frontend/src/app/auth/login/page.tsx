@@ -5,9 +5,7 @@ import { useRouter } from 'next/navigation';
 import { forgotPassword, sendOtp, verifyOtp } from '@/lib/auth';
 import { authStore } from '@/store/authStore';
 
-function roleLandingPath(role: string) {
-  return '/dashboard';
-}
+const landingPath = '/dashboard';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -23,7 +21,7 @@ export default function LoginPage() {
   useEffect(() => {
     authStore.bootstrap().then((me) => {
       if (me) {
-        router.replace(roleLandingPath(me.role));
+        router.replace(landingPath);
       }
     }).catch(() => undefined);
   }, [router]);
@@ -44,7 +42,7 @@ export default function LoginPage() {
         setNotice('Bạn cần đổi mật khẩu lần đầu trong mục Cài đặt.');
       }
       sessionStorage.setItem('kpi_welcome_notice', `Xin chào ${me.full_name}!`);
-      router.replace(roleLandingPath(me.role));
+      router.replace(landingPath);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Đăng nhập thất bại');
     } finally {
@@ -95,7 +93,7 @@ export default function LoginPage() {
         return;
       }
       sessionStorage.setItem('kpi_welcome_notice', `Xin chào ${me.full_name}!`);
-      router.replace(roleLandingPath(me.role));
+      router.replace(landingPath);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Xác thực OTP thất bại');
     } finally {
