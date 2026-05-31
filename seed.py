@@ -27,7 +27,7 @@ try:
     # Tạo Organization
     org = Organization(
         id=uuid.uuid4(),
-        name="Công ty KPI Mẫu",
+        name="Công ty GROUP 10",
         work_days=["mon", "tue", "wed", "thu", "fri"],
         work_start="08:00",
         work_end="17:30",
