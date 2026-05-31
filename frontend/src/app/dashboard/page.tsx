@@ -179,6 +179,15 @@ export default function DashboardPage() {
     loadData().catch((err) => setError(err instanceof Error ? err.message : 'Không tải được dữ liệu Dashboard'));
   }, [ready, loadData]);
 
+  useEffect(() => {
+    if (!ready) return;
+    const welcome = sessionStorage.getItem('kpi_welcome_notice');
+    if (welcome) {
+      setNotice(welcome);
+      sessionStorage.removeItem('kpi_welcome_notice');
+    }
+  }, [ready]);
+
   async function onExportExcel() {
     setError('');
     setNotice('');
@@ -209,11 +218,19 @@ export default function DashboardPage() {
           <p style={{ margin: '4px 0 0', color: '#475569' }}>Xin chào {me?.full_name || 'User'}</p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
+          {me?.avatar_url ? (
+            <img
+              src={me.avatar_url}
+              alt={me.full_name || 'avatar'}
+              style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', border: '1px solid #cbd5e1' }}
+            />
+          ) : null}
           <button type="button" onClick={() => router.push('/tasks')} style={btnSecondary}>Task</button>
           <button type="button" onClick={() => router.push('/kpi')} style={btnSecondary}>KPI</button>
           <button type="button" onClick={() => router.push('/settings')} style={btnSecondary}>Cài đặt</button>
           <button type="button" onClick={() => router.push('/notifications')} style={btnSecondary}>Thông báo</button>
           <button type="button" onClick={() => router.push('/onboarding')} style={btnSecondary}>Onboarding</button>
+          <button type="button" onClick={() => authStore.signOutAll().then(() => router.replace('/auth/login'))} style={btnSecondary}>Đăng xuất tất cả</button>
           <button type="button" onClick={() => authStore.signOut().then(() => router.replace('/auth/login'))} style={btnSecondary}>Đăng xuất</button>
         </div>
       </header>

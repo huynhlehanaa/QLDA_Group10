@@ -2,6 +2,7 @@
 Auth service: PB001-PB015
 """
 from datetime import datetime, timedelta, timezone
+import json
 from typing import Optional
 from uuid import UUID
 
@@ -50,6 +51,29 @@ def _log(db: Session, user_id: Optional[UUID], email: str, success: bool, reques
     )
     db.add(log)
     db.commit()
+
+
+def _serialize_refresh_session(user_id: str, session_expires_at: datetime) -> str:
+    return json.dumps(
+        {
+            "user_id": user_id,
+            "session_expires_at": session_expires_at.isoformat(),
+        }
+    )
+
+
+def _parse_refresh_session(value: Optional[str]) -> Optional[dict]:
+    if not value:
+        return None
+    try:
+        payload = json.loads(value)
+        if isinstance(payload, dict) and payload.get("user_id") and payload.get("session_expires_at"):
+            return payload
+    except json.JSONDecodeError:
+        pass
+
+    # Backward compatibility: old format only stored user_id string
+    return {"user_id": value, "session_expires_at": None}
 
 
 def login(email: str, password: str, db: Session, request: Request) -> dict:
@@ -118,11 +142,12 @@ def login(email: str, password: str, db: Session, request: Request) -> dict:
     payload = {"sub": str(user.id), "role": user.role}
     access_token = create_access_token(payload)
     refresh_token = create_refresh_token(payload)
+    session_expires_at = now + timedelta(hours=settings.SESSION_EXPIRE_HOURS)
 
     _r().setex(
         f"{_REFRESH_PREFIX}{refresh_token}",
         timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
-        str(user.id),
+        _serialize_refresh_session(str(user.id), session_expires_at),
     )
 
     return {
@@ -134,6 +159,7 @@ def login(email: str, password: str, db: Session, request: Request) -> dict:
         "user_id": str(user.id),
         "full_name": user.full_name,
         "avatar_url": user.avatar_url,
+        "session_expires_at": session_expires_at.isoformat(),
     }
 
 
@@ -143,21 +169,45 @@ def refresh_token(token: str) -> dict:
     if not payload or payload.get("type") != "refresh":
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token không hợp lệ")
 
-    stored = _r().get(f"{_REFRESH_PREFIX}{token}")
+    stored_raw = _r().get(f"{_REFRESH_PREFIX}{token}")
+    stored = _parse_refresh_session(stored_raw)
     if not stored:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token đã hết hạn hoặc bị thu hồi")
+
+    now = datetime.now(timezone.utc)
+    expires_raw = stored.get("session_expires_at")
+    session_expires_at = None
+    if expires_raw:
+        session_expires_at = datetime.fromisoformat(expires_raw)
+        if session_expires_at.tzinfo is None:
+            session_expires_at = session_expires_at.replace(tzinfo=timezone.utc)
+        if now >= session_expires_at:
+            _r().delete(f"{_REFRESH_PREFIX}{token}")
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại")
 
     new_access = create_access_token({"sub": payload["sub"], "role": payload["role"]})
     new_refresh = create_refresh_token({"sub": payload["sub"], "role": payload["role"]})
 
     _r().delete(f"{_REFRESH_PREFIX}{token}")
+    ttl = timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+    if session_expires_at:
+        remaining = session_expires_at - now
+        if remaining.total_seconds() <= 0:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại")
+        ttl = min(ttl, remaining)
+
     _r().setex(
         f"{_REFRESH_PREFIX}{new_refresh}",
-        timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
-        stored,
+        ttl,
+        _serialize_refresh_session(stored["user_id"], session_expires_at) if session_expires_at else stored["user_id"],
     )
 
-    return {"access_token": new_access, "refresh_token": new_refresh, "token_type": "bearer"}
+    return {
+        "access_token": new_access,
+        "refresh_token": new_refresh,
+        "token_type": "bearer",
+        "session_expires_at": session_expires_at.isoformat() if session_expires_at else None,
+    }
 
 
 def logout(refresh_token: str):
@@ -169,7 +219,8 @@ def logout_all(user_id: str):
     """PB006"""
     keys = _r().keys(f"{_REFRESH_PREFIX}*")
     for key in keys:
-        if _r().get(key) == user_id:
+        stored = _parse_refresh_session(_r().get(key))
+        if stored and stored.get("user_id") == user_id:
             _r().delete(key)
 
 
@@ -261,8 +312,17 @@ def verify_otp(email: str, otp: str, db: Session) -> dict:
 
     user = db.query(User).filter(User.email == email).first()
     payload = {"sub": str(user.id), "role": user.role}
+    now = datetime.now(timezone.utc)
+    refresh = create_refresh_token(payload)
+    session_expires_at = now + timedelta(hours=settings.SESSION_EXPIRE_HOURS)
+    _r().setex(
+        f"{_REFRESH_PREFIX}{refresh}",
+        timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
+        _serialize_refresh_session(str(user.id), session_expires_at),
+    )
     return {
         "access_token": create_access_token(payload),
-        "refresh_token": create_refresh_token(payload),
+        "refresh_token": refresh,
         "token_type": "bearer",
+        "session_expires_at": session_expires_at.isoformat(),
     }

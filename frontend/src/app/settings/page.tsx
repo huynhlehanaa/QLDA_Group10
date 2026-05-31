@@ -2,6 +2,7 @@
 
 import { type CSSProperties, FormEvent, useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { changePassword } from '@/lib/auth';
 import { authStore } from '@/store/authStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { type BreadcrumbItem, type DangerousAction, type HelpArticle, useSettings } from '@/hooks/useSettings';
@@ -48,6 +49,8 @@ export default function SettingsPage() {
   const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([]);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
 
   const loadData = useCallback(async () => {
     if (!accessToken) return;
@@ -158,6 +161,23 @@ export default function SettingsPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Không tạo được breadcrumb');
     }
+
+    async function onChangePassword(event: FormEvent<HTMLFormElement>) {
+      event.preventDefault();
+      if (!accessToken) return;
+      setError('');
+      setNotice('');
+      try {
+        const res = await changePassword(accessToken, oldPassword, newPassword);
+        setOldPassword('');
+        setNewPassword('');
+        setNotice(res.message || 'Đổi mật khẩu thành công, vui lòng đăng nhập lại.');
+        await authStore.signOutAll();
+        router.replace('/auth/login');
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Đổi mật khẩu thất bại');
+      }
+    }
   }
 
   return (
@@ -171,9 +191,33 @@ export default function SettingsPage() {
           <button type="button" onClick={() => router.push('/dashboard')} style={btnSecondary}>Dashboard</button>
           <button type="button" onClick={() => router.push('/notifications')} style={btnSecondary}>Thông báo</button>
           <button type="button" onClick={() => router.push('/onboarding')} style={btnSecondary}>Onboarding</button>
+          <button type="button" onClick={() => authStore.signOutAll().then(() => router.replace('/auth/login'))} style={btnSecondary}>Đăng xuất tất cả</button>
           <button type="button" onClick={() => authStore.signOut().then(() => router.replace('/auth/login'))} style={btnSecondary}>Đăng xuất</button>
         </div>
       </header>
+
+      <section style={cardStyle}>
+        <h2 style={{ margin: 0, fontSize: 18 }}>Đổi mật khẩu</h2>
+        <form onSubmit={onChangePassword} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 8 }}>
+          <input
+            type="password"
+            value={oldPassword}
+            onChange={(e) => setOldPassword(e.target.value)}
+            placeholder="Mật khẩu hiện tại"
+            required
+            style={inputStyle}
+          />
+          <input
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            placeholder="Mật khẩu mới"
+            required
+            style={inputStyle}
+          />
+          <button type="submit" disabled={loading} style={btnPrimary}>Cập nhật</button>
+        </form>
+      </section>
 
       <section style={cardStyle}>
         <h2 style={{ margin: 0, fontSize: 18 }}>Thông tin công ty</h2>

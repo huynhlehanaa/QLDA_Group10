@@ -18,6 +18,7 @@ class LoginResponse(BaseModel):
     user_id: str
     full_name: str
     avatar_url: Optional[str] = None
+    session_expires_at: Optional[str] = None
 
 
 class RefreshRequest(BaseModel):
@@ -92,3 +93,4 @@ class TokenResponse(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
+    session_expires_at: Optional[str] = None
