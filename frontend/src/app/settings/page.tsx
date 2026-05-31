@@ -161,22 +161,22 @@ export default function SettingsPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Không tạo được breadcrumb');
     }
+  }
 
-    async function onChangePassword(event: FormEvent<HTMLFormElement>) {
-      event.preventDefault();
-      if (!accessToken) return;
-      setError('');
-      setNotice('');
-      try {
-        const res = await changePassword(accessToken, oldPassword, newPassword);
-        setOldPassword('');
-        setNewPassword('');
-        setNotice(res.message || 'Đổi mật khẩu thành công, vui lòng đăng nhập lại.');
-        await authStore.signOutAll();
-        router.replace('/auth/login');
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Đổi mật khẩu thất bại');
-      }
+  async function onChangePassword(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!accessToken) return;
+    setError('');
+    setNotice('');
+    try {
+      const res = await changePassword(accessToken, oldPassword, newPassword);
+      setOldPassword('');
+      setNewPassword('');
+      setNotice(res.message || 'Đổi mật khẩu thành công, vui lòng đăng nhập lại.');
+      await authStore.signOutAll();
+      router.replace('/auth/login');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Đổi mật khẩu thất bại');
     }
   }
 
