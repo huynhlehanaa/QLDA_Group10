@@ -21,6 +21,9 @@ from app.schemas.task import (
     CommentCreate, ChecklistCreate, ChecklistUpdate,
     ExtensionRequestCreate, ExtensionReview,
 )
+from app.services.notification_service import notify_task_assigned
+from app.services.notification_service import notify_progress_updated
+from app.services.notification_service import notify_new_comment, notify_comment_reply
 
 
 # ── Helpers ───────────────────────────────────────────────────
@@ -179,8 +182,76 @@ def create_task(data: TaskCreate, user: User, db: Session) -> Task:
 
     _log_history(db, task.id, user.id, "created", "", task.title)
     db.commit()
+
+    if data.assignee_ids:
+        notify_task_assigned(
+            task.id, task.title, data.assignee_ids,
+            user.full_name, task.deadline, db,
+        )
+
     db.refresh(task)
     return task
+
+
+def get_staff_tasks(staff_id: UUID, requesting_user: User, db: Session, filters: TaskFilterParams) -> dict:
+    """
+    Manager xem task của một nhân viên cụ thể trong phòng ban.
+    Staff chỉ xem được task của chính mình.
+    """
+    # Kiểm tra quyền
+    staff = db.query(User).filter(User.id == staff_id).first()
+    if not staff:
+        raise HTTPException(status_code=404, detail="Không tìm thấy nhân viên")
+
+    if requesting_user.role == "staff" and requesting_user.id != staff_id:
+        raise HTTPException(status_code=403, detail="Bạn chỉ xem được task của chính mình")
+
+    if requesting_user.role == "manager" and staff.dept_id != requesting_user.dept_id:
+        raise HTTPException(status_code=403, detail="Nhân viên không thuộc phòng ban của bạn")
+
+    now = datetime.now(timezone.utc)
+
+    def _make_aware(dt):
+        if dt and dt.tzinfo is None:
+            return dt.replace(tzinfo=timezone.utc)
+        return dt
+
+    assigned_ids = [
+        ta.task_id for ta in db.query(TaskAssignee).filter(TaskAssignee.user_id == staff_id).all()
+    ]
+    q = db.query(Task).filter(Task.id.in_(assigned_ids), Task.status != "cancelled")
+
+    if filters.status:
+        q = q.filter(Task.status == filters.status)
+    if filters.priority:
+        q = q.filter(Task.priority == filters.priority)
+    if filters.overdue_only:
+        q = q.filter(Task.deadline < now, Task.status.notin_(["done", "cancelled"]))
+
+    tasks = q.order_by(Task.deadline.asc().nullslast()).all()
+    task_list = [_build_list_item(t, db, now) for t in tasks]
+
+    # Thống kê
+    all_tasks = db.query(Task).filter(Task.id.in_(assigned_ids)).all()
+    overdue_count = sum(
+        1 for t in all_tasks
+        if t.deadline and _make_aware(t.deadline) < now
+        and t.status not in ("done", "cancelled")
+    )
+
+    return {
+        "user_id": str(staff.id),
+        "full_name": staff.full_name,
+        "avatar_url": staff.avatar_url,
+        "stats": {
+            "total": len(all_tasks),
+            "todo": sum(1 for t in all_tasks if t.status == "todo"),
+            "in_progress": sum(1 for t in all_tasks if t.status == "in_progress"),
+            "done": sum(1 for t in all_tasks if t.status == "done"),
+            "overdue": overdue_count,
+        },
+        "tasks": task_list,
+    }
 
 
 def get_task(task_id: UUID, user: User, db: Session) -> dict:
@@ -193,6 +264,10 @@ def get_task(task_id: UUID, user: User, db: Session) -> dict:
 
     result = task.__dict__.copy()
     result.update(_enrich(task, db))
+    result["checklists"] = [
+        {"id": c.id, "content": c.content, "is_done": c.is_done, "position": c.position}
+        for c in task.checklists
+    ]
 
     # Comments dạng thread
     top_comments = db.query(TaskComment).filter(
@@ -239,7 +314,7 @@ def list_tasks(user: User, db: Session, filters: TaskFilterParams) -> list:
     if user.role == "staff":
         assigned_task_ids = db.query(TaskAssignee.task_id).filter(
             TaskAssignee.user_id == user.id
-        ).subquery()
+        ).scalar_subquery()
         q = q.filter(Task.id.in_(assigned_task_ids))
     elif user.role == "manager":
         q = q.filter(Task.dept_id == user.dept_id)
@@ -260,7 +335,7 @@ def list_tasks(user: User, db: Session, filters: TaskFilterParams) -> list:
     if filters.assignee_id:
         assigned = db.query(TaskAssignee.task_id).filter(
             TaskAssignee.user_id == filters.assignee_id
-        ).subquery()
+        ).scalar_subquery()
         q = q.filter(Task.id.in_(assigned))
 
     # PB111, PB112: lọc deadline
@@ -324,6 +399,9 @@ def update_task(task_id: UUID, data: TaskUpdate, user: User, db: Session) -> Tas
     task = _get_task_or_404(db, task_id)
     _assert_manager_of_dept(user, task.dept_id)
 
+    old_deadline = task.deadline
+    old_assignee_ids = [ta.user_id for ta in task.assignees]
+
     if data.title is not None:
         _log_history(db, task_id, user.id, "title", task.title, data.title)
         task.title = data.title
@@ -349,6 +427,21 @@ def update_task(task_id: UUID, data: TaskUpdate, user: User, db: Session) -> Tas
                      "", ", ".join(str(x) for x in data.assignee_ids))
 
     db.commit()
+
+    # PB217: deadline changed
+    if data.deadline is not None and old_deadline != data.deadline:
+        from app.services.notification_service import notify_deadline_changed
+        assignee_ids = [ta.user_id for ta in task.assignees]
+        if assignee_ids:
+            notify_deadline_changed(task.id, task.title, assignee_ids,
+                                    old_deadline, data.deadline, db)
+
+    # PB218: reassigned
+    if data.assignee_ids is not None:
+        from app.services.notification_service import notify_task_reassigned
+        notify_task_reassigned(task.id, task.title,
+                            old_assignee_ids, data.assignee_ids, db)
+    
     db.refresh(task)
     return task
 
@@ -360,6 +453,7 @@ def update_status(task_id: UUID, status: str, progress_pct: Optional[int],
     _assert_assignee_or_manager(user, task, db)
 
     old_status = task.status
+    old_progress = task.progress_pct
     now = datetime.now(timezone.utc)
 
     # PB086: done → ghi timestamp
@@ -379,6 +473,10 @@ def update_status(task_id: UUID, status: str, progress_pct: Optional[int],
         task.status = status
 
     db.commit()
+    if progress_pct is not None and progress_pct != old_progress:
+        notify_progress_updated(task.id, task.title, task.dept_id,
+                                user.full_name, progress_pct, db)
+    
     db.refresh(task)
     return task
 
@@ -432,6 +530,16 @@ def add_comment(task_id: UUID, data: CommentCreate, user: User, db: Session) -> 
     )
     db.add(comment)
     db.commit()
+    
+    if data.parent_id:
+        parent = db.query(TaskComment).filter(TaskComment.id == data.parent_id).first()
+        if parent:
+            notify_comment_reply(task.id, task.title, parent.user_id,
+                                user.full_name, data.content, db)
+    else:
+        notify_new_comment(task.id, task.title, task.dept_id,
+                        user.full_name, data.content, user.id, db)
+        
     db.refresh(comment)
     return comment
 
@@ -511,7 +619,8 @@ def update_checklist(item_id: UUID, data: ChecklistUpdate, user: User, db: Sessi
     # PB072: tự cập nhật % progress theo checklist
     checklists = db.query(TaskChecklist).filter(TaskChecklist.task_id == item.task_id).all()
     if checklists:
-        done_count = sum(1 for c in checklists if c.is_done) + (1 if data.is_done else 0)
+        # db.refresh sau khi item.is_done đã được set ở trên
+        done_count = sum(1 for c in checklists if c.is_done)
         task.progress_pct = round(done_count / len(checklists) * 100)
 
     db.commit()
@@ -541,7 +650,14 @@ def request_extension(task_id: UUID, data: ExtensionRequestCreate,
     db.add(req)
     db.commit()
     db.refresh(req)
-    return req
+    return {
+        "id": str(req.id),
+        "task_id": str(req.task_id),
+        "proposed_deadline": str(req.proposed_deadline),
+        "reason": req.reason,
+        "status": req.status,
+        "created_at": str(req.created_at),
+    }
 
 
 def review_extension(req_id: UUID, data: ExtensionReview, user: User, db: Session):
@@ -568,7 +684,14 @@ def review_extension(req_id: UUID, data: ExtensionReview, user: User, db: Sessio
                      note=f"Phê duyệt gia hạn: {data.note}")
 
     db.commit()
-    return req
+    db.refresh(req)
+    return {
+        "id": str(req.id),
+        "task_id": str(req.task_id),
+        "status": req.status,
+        "review_note": req.review_note,
+        "reviewed_at": str(req.reviewed_at),
+    }
 
 
 # ── Workload ──────────────────────────────────────────────────
@@ -597,7 +720,13 @@ def get_workload(dept_id: UUID, user: User, db: Session) -> list:
         todo_count = sum(1 for t in tasks if t.status == "todo")
         ip_count   = sum(1 for t in tasks if t.status == "in_progress")
         done_count = sum(1 for t in tasks if t.status == "done")
-        overdue = sum(1 for t in tasks if t.deadline and t.deadline < now
+
+        def _make_aware(dt):
+            if dt and dt.tzinfo is None:
+                return dt.replace(tzinfo=timezone.utc)
+            return dt
+
+        overdue = sum(1 for t in tasks if t.deadline and _make_aware(t.deadline) < now
                       and t.status not in ("done", "cancelled"))
 
         result.append({
@@ -617,10 +746,15 @@ def get_task_stats(user: User, db: Session,
                    to_date: Optional[datetime] = None) -> dict:
     """PB117, PB118"""
     now = datetime.now(timezone.utc)
+
+    def _make_aware(dt):
+        if dt and dt.tzinfo is None:
+            return dt.replace(tzinfo=timezone.utc)
+        return dt
     q = db.query(Task)
 
     if user.role == "staff":
-        assigned = db.query(TaskAssignee.task_id).filter(TaskAssignee.user_id == user.id).subquery()
+        assigned = db.query(TaskAssignee.task_id).filter(TaskAssignee.user_id == user.id).scalar_subquery()
         q = q.filter(Task.id.in_(assigned))
     elif user.role == "manager":
         q = q.filter(Task.dept_id == user.dept_id)
@@ -637,7 +771,8 @@ def get_task_stats(user: User, db: Session,
     done_late    = sum(1 for t in tasks if t.status == "done"
                        and t.completed_at and t.deadline
                        and t.completed_at > t.deadline)
-    overdue      = sum(1 for t in tasks if t.deadline and t.deadline < now
+
+    overdue     =  sum(1 for t in tasks if t.deadline and _make_aware(t.deadline) < now
                        and t.status not in ("done", "cancelled"))
 
     return {

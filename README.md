@@ -1,1 +1,0 @@
-# QLDA_Group10

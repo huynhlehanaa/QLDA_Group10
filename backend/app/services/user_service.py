@@ -22,6 +22,7 @@ from app.services.email_service import (
     send_new_manager_email,
     send_new_staff_email,
 )
+from app.services.onboarding_service import send_welcome_email
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -73,7 +74,7 @@ def create_manager(org_id: UUID, full_name: str, email: str, dept_id: UUID, db: 
     db.commit()
     db.refresh(user)
 
-    send_new_manager_email(email, full_name, temp_pw)  # PB024
+    send_welcome_email(email, full_name, temp_pw, "manager")  # PB233
     return user
 
 
@@ -133,10 +134,8 @@ def reset_user_password(user_id: UUID, requesting_role: str, requesting_dept: Op
     logout_all(str(user.id))
     db.commit()
 
-    if user.role == "manager":
-        send_new_manager_email(user.email, user.full_name, temp_pw)
-    else:
-        send_new_staff_email(user.email, user.full_name, temp_pw)
+    role_name = "manager" if user.role == "manager" else "staff"
+    send_welcome_email(user.email, user.full_name, temp_pw, role_name)  # PB233
 
     return temp_pw
 
@@ -181,7 +180,7 @@ def create_staff(org_id: UUID, dept_id: UUID, full_name: str, email: str,
     db.commit()
     db.refresh(user)
 
-    send_new_staff_email(email, full_name, temp_pw)  # PB034
+    send_welcome_email(email, full_name, temp_pw, "staff")  # PB233
     return user
 
 
@@ -241,7 +240,7 @@ def import_staff_from_excel(file_bytes: bytes, org_id: UUID, dept_id: UUID, db: 
         )
         db.add(user)
         created.append({"email": email, "full_name": full_name})
-        send_new_staff_email(email, full_name, temp_pw)
+        send_welcome_email(email, full_name, temp_pw, "staff")  # PB233
 
     db.commit()
     return {"created": len(created), "errors": errors, "details": created}
@@ -264,5 +263,6 @@ def update_phone(user: User, phone: str, db: Session) -> User:
         raise HTTPException(status_code=400, detail="Số điện thoại không đúng định dạng Việt Nam")
     user.phone = phone
     db.commit()
+
     db.refresh(user)
     return user

@@ -3,6 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import auth, users, organizations, logs
 from app.api import tasks   # Sprint 2
+from app.api import kpi     # Sprint 3 - KPI Management
+from app.api import dashboard
+from app.api import pwa
+from app.api import settings # Sprint 4 - Settings
+from app.api import notifications
+from app.api import onboarding
 
 app = FastAPI(
     title="KPI Nội Bộ API",
@@ -27,6 +33,15 @@ app.include_router(logs.router,          prefix="/api/v1")
 # Sprint 2
 app.include_router(tasks.router,         prefix="/api/v1")
 
+# Sprint 3
+app.include_router(kpi.router,           prefix="/api/v1")
+app.include_router(dashboard.router,     prefix="/api/v1")
+app.include_router(pwa.router,           prefix="/api/v1")
+
+# Sprint 4
+app.include_router(settings.router,      prefix="/api/v1")
+app.include_router(notifications.router, prefix="/api/v1")
+app.include_router(onboarding.router,    prefix="/api/v1")
 
 @app.get("/")
 def root():

@@ -149,6 +149,57 @@ def export_excel(
     )
 
 
+@router.get("/me")
+def get_my_tasks(
+    status_filter: Optional[str] = Query(None, alias="status"),
+    priority: Optional[str]     = Query(None),
+    overdue_only: bool          = Query(False),
+    sort_by: str                = Query("deadline"),
+    sort_dir: str               = Query("asc"),
+    current_user: User          = Depends(get_current_user),
+    db: Session                 = Depends(get_db),
+):
+    """
+    Trả về task của nhân viên đang đăng nhập kèm thống kê tổng hợp.
+    Staff dùng màn hình cá nhân, Manager/CEO dùng để xem task do mình tạo.
+    """
+    from app.services.task_service import list_tasks, get_task_stats
+    filters = TaskFilterParams(
+        status=status_filter,
+        priority=priority,
+        overdue_only=overdue_only,
+        sort_by=sort_by,
+        sort_dir=sort_dir,
+    )
+    tasks = list_tasks(current_user, db, filters)
+    stats = get_task_stats(current_user, db)
+    return {
+        "user_id": str(current_user.id),
+        "full_name": current_user.full_name,
+        "avatar_url": current_user.avatar_url,
+        "stats": stats,
+        "tasks": tasks,
+    }
+
+
+@router.get("/staff/{staff_id}")
+def get_staff_tasks(
+    staff_id: UUID,
+    status_filter: Optional[str] = Query(None, alias="status"),
+    priority: Optional[str]     = Query(None),
+    overdue_only: bool          = Query(False),
+    current_user: User          = Depends(get_current_user),
+    db: Session                 = Depends(get_db),
+):
+    """Manager xem task của một nhân viên cụ thể trong phòng ban."""
+    filters = TaskFilterParams(
+        status=status_filter,
+        priority=priority,
+        overdue_only=overdue_only,
+    )
+    return task_service.get_staff_tasks(staff_id, current_user, db, filters)
+
+
 @router.get("/{task_id}")
 def get_task(
     task_id: UUID,
