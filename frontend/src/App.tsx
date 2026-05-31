@@ -18,6 +18,7 @@ import EmployeeNotificationsPage from './pages/EmployeeNotificationsPage'
 import EmployeeCalendarPage from './pages/EmployeeCalendarPage'
 import EmployeeHelpCenterPage from './pages/EmployeeHelpCenterPage'
 import EmployeeSettingsPage from './pages/EmployeeSettingsPage'
+import CeoManagerDashboardPage from './pages/CeoManagerDashboardPage';
 
 function RedirectToProfileSecurity() {
   return <Navigate to="/profile-security" replace />
@@ -63,6 +64,7 @@ function AppRoutes() {
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/unauthorized" element={<UnauthorizedPage />} />
       <Route path="/out-of-scope" element={<OutOfScopePage />} />
+      <Route path="/ceo-dashboard" element={<CeoManagerDashboardPage />} />
 
       <Route element={<ProtectedRoute allowedRoles={['staff']} />}>
         <Route element={<AppShell />}>

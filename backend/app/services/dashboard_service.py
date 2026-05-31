@@ -242,12 +242,14 @@ def get_performance_report(user: User, year: int, month: int,
 
         tasks_in_period = db.query(Task).filter(
             Task.id.in_(assigned_ids),
-            Task.deadline >= start,
-            Task.deadline <= end,
             Task.status != "cancelled",
         ).all()
 
-        done_tasks = [t for t in tasks_in_period if t.status == "done"]
+        done_tasks = [
+            t for t in tasks_in_period
+            if t.status == "done" and t.completed_at and
+            start <= _make_aware(t.completed_at) <= end
+        ]
         on_time = sum(
             1 for t in done_tasks
             if t.completed_at and t.deadline and
