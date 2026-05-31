@@ -97,14 +97,19 @@ export const authStore = {
       }
       try {
         const tokenData = await refreshToken(this.state.refreshToken);
+        const resolvedSessionExpiresAt = tokenData.session_expires_at || this.state.sessionExpiresAt;
+        if (!resolvedSessionExpiresAt) {
+          this.clear();
+          return null;
+        }
         this.setState({
           accessToken: tokenData.access_token,
           refreshToken: tokenData.refresh_token,
-          sessionExpiresAt: tokenData.session_expires_at || this.state.sessionExpiresAt
+          sessionExpiresAt: resolvedSessionExpiresAt
         });
         writeSession(ACCESS_TOKEN_KEY, tokenData.access_token);
         writeSession(REFRESH_TOKEN_KEY, tokenData.refresh_token);
-        writeSession(SESSION_EXPIRES_AT_KEY, tokenData.session_expires_at || this.state.sessionExpiresAt);
+        writeSession(SESSION_EXPIRES_AT_KEY, resolvedSessionExpiresAt);
         this.setState({ me: await fetchMe(tokenData.access_token) });
         return this.state.me;
       } catch (error) {

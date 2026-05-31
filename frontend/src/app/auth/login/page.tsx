@@ -6,7 +6,6 @@ import { forgotPassword, sendOtp, verifyOtp } from '@/lib/auth';
 import { authStore } from '@/store/authStore';
 
 function roleLandingPath(role: string) {
-  if (role === 'staff') return '/tasks';
   return '/dashboard';
 }
 

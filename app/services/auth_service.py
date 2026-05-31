@@ -67,7 +67,7 @@ def _parse_refresh_session(value: Optional[str]) -> Optional[dict]:
         return None
     try:
         payload = json.loads(value)
-        if isinstance(payload, dict) and payload.get("user_id") and payload.get("session_expires_at"):
+        if isinstance(payload, dict) and payload.get("user_id"):
             return payload
     except json.JSONDecodeError:
         pass
@@ -199,7 +199,7 @@ def refresh_token(token: str) -> dict:
     _r().setex(
         f"{_REFRESH_PREFIX}{new_refresh}",
         ttl,
-        _serialize_refresh_session(stored["user_id"], session_expires_at) if session_expires_at else stored["user_id"],
+        _serialize_refresh_session(stored["user_id"], session_expires_at) if session_expires_at else json.dumps({"user_id": stored["user_id"]}),
     )
 
     return {
